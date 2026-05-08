@@ -187,7 +187,7 @@ static void INIT_PATCH_NAME(void) {
 	}
     #ifdef PATCH_MODE
     NSString* _kNhz28MfAL9o = nil;
-    NSMutableData* _kLx59qEfBdwU = StaticInlineHookSessionStart((char*)[ENCRYPT_NS("freefireth") UTF8String], &_kNhz28MfAL9o);
+    NSMutableData* _kLx59qEfBdwU = StaticInlineHookSessionStart((char*)[ENCRYPT_NS("FreeFire") UTF8String], &_kNhz28MfAL9o);
 
 // ═══════════════════════════════════════════════════════════════
 // GROUP L: Memory Scan Bypass (4)
