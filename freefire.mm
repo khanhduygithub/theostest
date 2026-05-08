@@ -1,4 +1,4 @@
-#define PATCH_MODE
+// #define PATCH_MODE
 #import <Foundation/Foundation.h>
 #include <string>
 #include <dlfcn.h>
