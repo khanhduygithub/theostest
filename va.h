@@ -788,7 +788,7 @@ BOOL DeactiveCodePatch(char* machoPath, uint64_t vaddr, char* patch)
     return YES;
 }
 
-#define DEFAULT_MACHO_PATH "freefireth"
+#define DEFAULT_MACHO_PATH "UnityFramework"
 
 #define ActiveOff(vaddr, patch) \
     ActiveCodePatch(DEFAULT_MACHO_PATH, vaddr, patch)
