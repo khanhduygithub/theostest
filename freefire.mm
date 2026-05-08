@@ -190,30 +190,19 @@ static void INIT_PATCH_NAME(void) {
     NSMutableData* _kLx59qEfBdwU = StaticInlineHookSessionStart((char*)[ENCRYPT_NS("freefireth") UTF8String], &_kNhz28MfAL9o);
 
 // ═══════════════════════════════════════════════════════════════
-// GROUP A: Integrity Checks (4)
+// GROUP L: Memory Scan Bypass (4)
 // ═══════════════════════════════════════════════════════════════
-StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1CFA010"), ENCRYPTHEX("000080d2c0035fd6"));
-StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1CFA198"), ENCRYPTHEX("000080d2c0035fd6"));
-StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1CFA2A4"), ENCRYPTHEX("000080d2c0035fd6"));
-StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1CFA3F0"), ENCRYPTHEX("000080d2c0035fd6"));
-
-    // 4 cheat functions
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x27D07B4"), nullptr);
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1CD5200"), nullptr);
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x5EB914C"), nullptr);
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1C7CFAC"), nullptr);
+StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x6281F88"), ENCRYPTHEX("000080d2c0035fd6"));
+StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x6281F90"), ENCRYPTHEX("000080d2c0035fd6"));
+StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x6282104"), ENCRYPTHEX("000080d2c0035fd6"));
+StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x6282250"), ENCRYPTHEX("000080d2c0035fd6"));
 
     StaticInlineHookSessionSave(_kLx59qEfBdwU, _kNhz28MfAL9o);
 #else
-ActiveOff(ENCRYPTOFFSET("0x1CFA010"), ENCRYPTHEX("000080d2c0035fd6"));
-ActiveOff(ENCRYPTOFFSET("0x1CFA198"), ENCRYPTHEX("000080d2c0035fd6"));
-ActiveOff(ENCRYPTOFFSET("0x1CFA2A4"), ENCRYPTHEX("000080d2c0035fd6"));
-ActiveOff(ENCRYPTOFFSET("0x1CFA3F0"), ENCRYPTHEX("000080d2c0035fd6"));
-
-    InlineHook(ENCRYPTOFFSET("0x27D07B4"), resetguesthook, resetguestoriginal);
-    InlineHook(ENCRYPTOFFSET("0x1CD5200"), force120fpshook, force120fpsoriginal);
-    InlineHook(ENCRYPTOFFSET("0x5EB914C"), hook_get_InSwapWeaponCD, orig_get_InSwapWeaponCD);
-    InlineHook(ENCRYPTOFFSET("0x1C7CFAC"), hook_KHHMBLDMKEN, orig_KHHMBLDMKEN);
+ActiveOff(ENCRYPTOFFSET("0x6281F88"), ENCRYPTHEX("000080d2c0035fd6"));
+ActiveOff(ENCRYPTOFFSET("0x6281F90"), ENCRYPTHEX("000080d2c0035fd6"));
+ActiveOff(ENCRYPTOFFSET("0x6282104"), ENCRYPTHEX("000080d2c0035fd6"));
+ActiveOff(ENCRYPTOFFSET("0x6282250"), ENCRYPTHEX("000080d2c0035fd6"));
 
 #endif
 }
