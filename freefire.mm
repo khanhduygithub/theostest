@@ -187,7 +187,7 @@ static void INIT_PATCH_NAME(void) {
 	}
     #ifdef PATCH_MODE
     NSString* _kNhz28MfAL9o = nil;
-    NSMutableData* _kLx59qEfBdwU = StaticInlineHookSessionStart((char*)[ENCRYPT_NS("UnityFramework") UTF8String], &_kNhz28MfAL9o);
+    NSMutableData* _kLx59qEfBdwU = StaticInlineHookSessionStart((char*)[ENCRYPT_NS("Frameworks/UnityFramework.framework/UnityFramework") UTF8String], &_kNhz28MfAL9o);
 
 // ═══════════════════════════════════════════════════════════════
 // GROUP A: Integrity Checks (4)
