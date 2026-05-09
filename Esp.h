@@ -16,353 +16,184 @@ static inline ImVec2 operator+(const ImVec2& lhs, const float rhs) { return ImVe
 static inline ImVec2 operator+(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x + rhs.x, lhs.y + rhs.y); }
 static inline ImVec2 operator-(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x - rhs.x, lhs.y - rhs.y); }
 static inline ImVec2 operator-(const ImVec2& lhs, const float rhs) { return ImVec2(lhs.x - rhs, lhs.y - rhs); }
-static inline ImVec2 operator*(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x * rhs.x, lhs.y * rhs.y); }
-static inline ImVec2 operator/(const ImVec2& lhs, const ImVec2& rhs) { return ImVec2(lhs.x / rhs.x, lhs.y / rhs.y); }
-static inline ImVec2& operator*=(ImVec2& lhs, const float rhs) { lhs.x *= rhs; lhs.y *= rhs; return lhs; }
-static inline ImVec2& operator/=(ImVec2& lhs, const float rhs) { lhs.x /= rhs; lhs.y /= rhs; return lhs; }
-static inline ImVec2& operator+=(ImVec2& lhs, const ImVec2& rhs) { lhs.x += rhs.x; lhs.y += rhs.y; return lhs; }
-static inline ImVec2& operator-=(ImVec2& lhs, const ImVec2& rhs) { lhs.x -= rhs.x; lhs.y -= rhs.y; return lhs; }
-static inline ImVec2& operator*=(ImVec2& lhs, const ImVec2& rhs) { lhs.x *= rhs.x; lhs.y *= rhs.y; return lhs; }
-static inline ImVec2& operator/=(ImVec2& lhs, const ImVec2& rhs) { lhs.x /= rhs.x; lhs.y /= rhs.y; return lhs; }
-static inline ImVec4 operator+(const ImVec4& lhs, const ImVec4& rhs) { return ImVec4(lhs.x + rhs.x, lhs.y + rhs.y, lhs.z + rhs.z, lhs.w + rhs.w); }
-static inline ImVec4 operator-(const ImVec4& lhs, const ImVec4& rhs) { return ImVec4(lhs.x - rhs.x, lhs.y - rhs.y, lhs.z - rhs.z, lhs.w - rhs.w); }
-static inline ImVec4 operator*(const ImVec4& lhs, const ImVec4& rhs) { return ImVec4(lhs.x * rhs.x, lhs.y * rhs.y, lhs.z * rhs.z, lhs.w * rhs.w); }
 
-template <typename T>
-inline T clamp(const T& n, const T& lower, const T& upper) {
-    return std::max(lower, std::min(n, upper));
-}
-
-inline float lerp(float a, float b, float f) { return clamp<float>(a + f * (b - a), a > b ? b : a, a > b ? a : b); }
-inline ImColor collerp(ImColor a, ImColor b, float f) { return {a.Value.x + f * (b.Value.x - a.Value.x), a.Value.y + f * (b.Value.y - a.Value.y), a.Value.z + f * (b.Value.z - a.Value.z), a.Value.w + f * (b.Value.w - a.Value.w)}; }
-
-bool ESPEnable = false, ESPLine = false, ESPBox = false, ESP2DBox = false, ESP3DBox = false, ESP3DBox2 = false, Fov = false;
-bool ESPCount = false, ESPArrow = false, ESPArrow2 = false, ESPHealth = false, ESPHealth2 = false, ESPName = false;
-bool ESPOutline = false, ESPDistance = false, ESPDistance2 = false, RS = false;
-
-extern int ESPBoxShape;
-extern int ESPHealthPosition;
-extern int ESPNameShadow;
-extern ImFont* _espFont;
-
-float sliderDistanceValue = 300.0f;
+bool ESPEnable = false, ESPLine = false, ESPBox = false, ESPHealth = false, ESPName = false;
+bool ESPDistance = false, ESPSkeleton = false;
+bool Aimbot = false, enableESP = false;
 float AimbotFOV = 90.0f;
-int AimCheck = 0;
-int AimType = 0;
-int AimWhen = 1;
-bool Aimbot = false;
-float AimDis = 150.0f;
-bool Enable = true;
-bool isAiming = false;
-bool IgnoreBots = false;
-int AimMode = 1;
-bool IgnoreKnocked = false;
-bool OnlyVisibleEnemies = false;
-int AimTarget = 0;
-bool ESPSkeleton = false;
-bool SilentAim = false;
-bool LimitToFOV = false;
-bool enableESP = false;
 float AimSpeed = 1.0f;
-float colorVisible[4]   = { 0.8f, 0.498f, 1.0f, 1.0f };
-float colorInvisible[4] = { 0.8f, 0.498f, 1.0f, 1.0f };
+int AimTarget = 0, AimMode = 1, AimWhen = 1;
+bool IgnoreBots = false, IgnoreKnocked = false, OnlyVisibleEnemies = false;
 
-// ═══════════════════════════════════════════════════════════════
-// SAFE OFFSET FUNCTION - Returns offset directly from Offsets struct
-// ═══════════════════════════════════════════════════════════════
-#define SAFE_OFFSET(name) (Offsets::name != 0 ? getRealOffset(Offsets::name) : 0)
+// ═══════════════════════════════════════
+// SAFE READ - Không crash nếu offset = 0
+// ═══════════════════════════════════════
+#define SAFE_PTR(addr, type) ((Offsets::addr != 0) ? *(type*)((uintptr_t)player + Offsets::addr) : 0)
 
 void* get_main() {
+    if (Offsets::get_main == 0) return nullptr;
     static void* (*func)() = (void *(*)())getRealOffset(Offsets::get_main);
-    return func();
+    return func ? func() : nullptr;
 }
 
 void* get_transform(void* obj) {
+    if (!obj || Offsets::get_transform == 0) return nullptr;
     static void* (*func)(void*) = (void *(*)(void *))getRealOffset(Offsets::get_transform);
-    return func(obj);
+    return func ? func(obj) : nullptr;
 }
 
 void* get_transformNode(void* obj) {
+    if (!obj || Offsets::get_transformNode == 0) return nullptr;
     static void* (*func)(void*) = (void *(*)(void *))getRealOffset(Offsets::get_transformNode);
-    return func(obj);
+    return func ? func(obj) : nullptr;
 }
 
 Vector3 WorldToViewpoint(void* cam, Vector3 pos, int eye) {
+    if (!cam || Offsets::WorldToViewpoint == 0) return Vector3::Zero();
     static Vector3 (*func)(void*, Vector3, int) = (Vector3(*)(void *, Vector3, int))getRealOffset(Offsets::WorldToViewpoint);
-    return func(cam, pos, eye);
+    return func ? func(cam, pos, eye) : Vector3::Zero();
 }
 
 Vector3 get_position(void* obj) {
+    if (!obj || Offsets::get_position == 0) return Vector3::Zero();
     static Vector3 (*func)(void*) = (Vector3(*)(void *))getRealOffset(Offsets::get_position);
-    return func(obj);
+    return func ? func(obj) : Vector3::Zero();
 }
 
 bool IsTeammate(void* player) {
+    if (!player || Offsets::Team == 0) return true; // An toàn: coi là đồng đội
     static bool (*func)(void*) = (bool (*)(void *))getRealOffset(Offsets::Team);
-    return player ? func(player) : false;
-}
-
-bool IsLocalPlayer(void* player) {
-    static bool (*func)(void*) = (bool (*)(void *))getRealOffset(Offsets::Local);
-    return player ? func(player) : false;
-}
-
-ImVec2 world2screen_i(Vector3 pos) {
-    auto cam = get_main();
-    if (!cam) return {0, 0};
-    Vector3 worldPoint = WorldToViewpoint(cam, pos, 2);
-    Vector3 location;
-    CGFloat screenWidth = [UIScreen mainScreen].bounds.size.width;
-    CGFloat screenHeight = [UIScreen mainScreen].bounds.size.height;
-    location.x = screenWidth * worldPoint.x;
-    location.y = screenHeight - (screenHeight * worldPoint.y);
-    location.z = worldPoint.z;
-    return {location.x, location.y};
+    return func ? func(player) : true;
 }
 
 ImVec2 world2screen_c(Vector3 pos, bool& checker) {
     auto cam = get_main();
-    if (!cam) return {0, 0};
+    if (!cam) { checker = false; return {0, 0}; }
     Vector3 worldPoint = WorldToViewpoint(cam, pos, 2);
-    Vector3 location;
     CGFloat screenWidth = [UIScreen mainScreen].bounds.size.width;
     CGFloat screenHeight = [UIScreen mainScreen].bounds.size.height;
+    Vector3 location;
     location.x = screenWidth * worldPoint.x;
     location.y = screenHeight - (screenHeight * worldPoint.y);
     location.z = worldPoint.z;
-    checker = location.z > 1;
+    checker = (location.z > 0);
     return {location.x, location.y};
 }
 
+ImVec2 world2screen_i(Vector3 pos) {
+    bool c; return world2screen_c(pos, c);
+}
+
 int get_HP(void* player) {
+    if (!player || Offsets::get_HP == 0) return 0;
     static int (*func)(void*) = (int (*)(void*))getRealOffset(Offsets::get_HP);
-    return func(player);
+    return func ? func(player) : 0;
 }
 
 int get_maxHP(void* player) {
+    if (!player || Offsets::get_maxHP == 0) return 100;
     static int (*func)(void*) = (int (*)(void*))getRealOffset(Offsets::get_maxHP);
-    return func(player);
-}
-
-bool get_isLiving(void* player) {
-    if (get_HP(player) > 0) return true;
-    else return false;
-}
-
-monoString* get_Nickname(void* player) {
-    static monoString* (*func)(void*) = (monoString* (*)(void*))getRealOffset(Offsets::Local);
-    return player ? func(player) : nullptr;
-}
-
-std::string monoStringToStdString(monoString* mStr) {
-    if (mStr == nullptr) return "";
-    return std::string(mStr->toCString());
-}
-
-std::string getPlayerNickname(void* player) {
-    if (player == nullptr) return "";
-    monoString* mStr = get_Nickname(player);
-    return monoStringToStdString(mStr);
+    return func ? func(player) : 100;
 }
 
 bool get_IsDieing(void* player) {
+    if (!player || Offsets::get_IsDieing == 0) return false;
     static bool (*func)(void*) = (bool (*)(void*))getRealOffset(Offsets::get_IsDieing);
-    return player ? func(player) : false;
-}
-
-bool get_IsVisible(void* player) {
-    static bool (*func)(void*) = (bool (*)(void*))getRealOffset(Offsets::get_IsVisible);
-    return player ? func(player) : false;
+    return func ? func(player) : false;
 }
 
 void* GetLocalPlayer(void* game) {
+    if (!game || Offsets::GetLocalPlayer == 0) return nullptr;
     static void* (*func)(void*) = (void* (*)(void*))getRealOffset(Offsets::GetLocalPlayer);
-    return func(game);
+    return func ? func(game) : nullptr;
 }
 
 void* Curent_Match() {
+    if (Offsets::CurrentMatch == 0) return nullptr;
     static void* (*func)(void*) = (void* (*)(void*))getRealOffset(Offsets::CurrentMatch);
-    return func(nullptr);
+    return func ? func(nullptr) : nullptr;
 }
 
 void* Camera_main() {
+    if (Offsets::Camera_main == 0) return nullptr;
     static void* (*func)(void*) = (void* (*)(void*))getRealOffset(Offsets::Camera_main);
-    return func(nullptr);
+    return func ? func(nullptr) : nullptr;
 }
 
 Quaternion GetRotation(void* player) {
+    if (!player || Offsets::GetRotation == 0) return Quaternion();
     static Quaternion (*func)(void*) = (Quaternion (*)(void*))getRealOffset(Offsets::GetRotation);
-    return player ? func(player) : Quaternion();
-}
-
-bool get_isLocalTeam(void* player) {
-    static bool (*func)(void*) = (bool (*)(void*))getRealOffset(Offsets::get_isLocalTeam);
-    return player ? func(player) : false;
+    return func ? func(player) : Quaternion();
 }
 
 bool get_IsSighting(void* player) {
+    if (!player || Offsets::get_IsSighting == 0) return false;
     static bool (*func)(void*) = (bool (*)(void*))getRealOffset(Offsets::get_IsSighting);
-    return player ? func(player) : false;
+    return func ? func(player) : false;
 }
 
 bool get_IsFiring(void* player) {
+    if (!player || Offsets::get_IsFiring == 0) return false;
     static bool (*func)(void*) = (bool (*)(void*))getRealOffset(Offsets::get_IsFiring);
-    return player ? func(player) : false;
-}
-
-Vector3 WorldToScreenPoint(void* worldCam, Vector3 worldPos) {
-    static Vector3 (*func)(void*, Vector3) = (Vector3 (*)(void*, Vector3))getRealOffset(Offsets::WorldToScreenPoint);
-    return func(worldCam, worldPos);
+    return func ? func(player) : false;
 }
 
 void* GetHeadPositions(void* player) {
+    if (!player || Offsets::GetHeadPositions == 0) return nullptr;
     static void* (*func)(void*) = (void* (*)(void*))getRealOffset(Offsets::GetHeadPositions);
-    return player ? func(player) : nullptr;
+    return func ? func(player) : nullptr;
 }
 
 void* Component_GetTransform(void* component) {
+    if (!component || Offsets::Component_GetTransform == 0) return nullptr;
     static void* (*func)(void*) = (void* (*)(void*))getRealOffset(Offsets::Component_GetTransform);
-    return component ? func(component) : nullptr;
+    return func ? func(component) : nullptr;
 }
 
-Quaternion GetRotationToTheLocation(Vector3 Target, float Height, Vector3 MyEnemy) {
-    return Quaternion::LookRotation((Target + Vector3(0, Height, 0)) - MyEnemy, Vector3(0, 1, 0));
+static void set_aim(void* player, Quaternion look) {
+    if (!player || Offsets::set_aim == 0) return;
+    typedef void (*tSetAim)(void*, Quaternion);
+    static tSetAim fn = (tSetAim)getRealOffset(Offsets::set_aim);
+    if (fn) fn(player, look);
+}
+
+static Vector3 GetForward(void* player) {
+    if (!player || Offsets::GetForward == 0) return Vector3();
+    static Vector3 (*func)(void*) = (Vector3 (*)(void*))getRealOffset(Offsets::GetForward);
+    return func ? func(player) : Vector3();
 }
 
 static Vector3 GetHeadPosition(void* player) {
-    return get_position(GetHeadPositions(player));
+    void* head = GetHeadPositions(player);
+    return head ? get_position(head) : Vector3::Zero();
 }
 
-Vector3 GetNeckPosition(void* player) {
-    Vector3 head = GetHeadPosition(player);
-    Vector3 foot = get_position(Component_GetTransform(player));
-    if (foot == Vector3(0, 0, 0)) foot = Vector3(head.x, head.y - 1.0f, head.z);
-    float proportion = 0.9f;
-    return head + (foot - head) * proportion;
-}
-
-Vector3 GetChestPosition(void* player) {
-    Vector3 head = GetHeadPosition(player);
-    Vector3 foot = get_position(Component_GetTransform(player));
-    if (foot == Vector3(0, 0, 0)) foot = Vector3(head.x, head.y - 1.0f, head.z);
-    float proportion = 0.75f;
-    return head + (foot - head) * proportion;
-}
-
-Vector3 GetHipPosition(void* player) {
-    if (Offsets::HipPosition == 0) return Vector3::Zero(); // FIX CRASH
-    void* HipITF = *(void**)((uintptr_t)player + Offsets::HipPosition);
-    void* HipTF = get_transformNode(HipITF);
-    return get_position(HipTF);
-}
-
-Vector3 GetLeftShoulderPosition(void* player) {
-    if (Offsets::LeftShoulderPosition == 0) return Vector3::Zero(); // FIX CRASH
-    void* ITF = *(void**)((uintptr_t)player + Offsets::LeftShoulderPosition);
+static Vector3 GetHipPosition(void* player) {
+    if (!player || Offsets::HipPosition == 0) return Vector3::Zero();
+    void* ITF = *(void**)((uintptr_t)player + Offsets::HipPosition);
     void* TF = get_transformNode(ITF);
-    return get_position(TF);
-}
-
-Vector3 GetRightShoulderPosition(void* player) {
-    if (Offsets::RightShoulderPosition == 0) return Vector3::Zero(); // FIX CRASH
-    void* ITF = *(void**)((uintptr_t)player + Offsets::RightShoulderPosition);
-    void* TF = get_transformNode(ITF);
-    return get_position(TF);
-}
-
-Vector3 GetLeftAnklePosition(void* player) {
-    if (Offsets::LeftAnklePosition == 0) return Vector3::Zero(); // FIX CRASH
-    void* ITF = *(void**)((uintptr_t)player + Offsets::LeftAnklePosition);
-    void* TF = get_transformNode(ITF);
-    return get_position(TF);
-}
-
-Vector3 GetRightAnklePosition(void* player) {
-    if (Offsets::RightAnklePosition == 0) return Vector3::Zero(); // FIX CRASH
-    void* ITF = *(void**)((uintptr_t)player + Offsets::RightAnklePosition);
-    void* TF = get_transformNode(ITF);
-    return get_position(TF);
-}
-
-Vector3 GetLeftToePosition(void* player) {
-    if (Offsets::LeftToePosition == 0) return Vector3::Zero(); // FIX CRASH
-    void* ITF = *(void**)((uintptr_t)player + Offsets::LeftToePosition);
-    void* TF = get_transformNode(ITF);
-    return get_position(TF);
-}
-
-Vector3 GetRightToePosition(void* player) {
-    if (Offsets::RightToePosition == 0) return Vector3::Zero(); // FIX CRASH
-    void* ITF = *(void**)((uintptr_t)player + Offsets::RightToePosition);
-    void* TF = get_transformNode(ITF);
-    return get_position(TF);
-}
-
-Vector3 GetLeftHandPosition(void* player) {
-    if (Offsets::LeftHandPosition == 0) return Vector3::Zero(); // FIX CRASH
-    void* ITF = *(void**)((uintptr_t)player + Offsets::LeftHandPosition);
-    void* TF = get_transformNode(ITF);
-    return get_position(TF);
-}
-
-Vector3 GetRightHandPosition(void* player) {
-    if (Offsets::RightHandPosition == 0) return Vector3::Zero(); // FIX CRASH
-    void* ITF = *(void**)((uintptr_t)player + Offsets::RightHandPosition);
-    void* TF = get_transformNode(ITF);
-    return get_position(TF);
-}
-
-Vector3 GetRightForeArmPosition(void* player) {
-    if (Offsets::RightForeArmPosition == 0) return Vector3::Zero(); // FIX CRASH
-    void* ITF = *(void**)((uintptr_t)player + Offsets::RightForeArmPosition);
-    void* TF = get_transformNode(ITF);
-    return get_position(TF);
-}
-
-Vector3 GetLeftForeArmPosition(void* player) {
-    if (Offsets::LeftForeArmPosition == 0) return Vector3::Zero(); // FIX CRASH
-    void* ITF = *(void**)((uintptr_t)player + Offsets::LeftForeArmPosition);
-    void* TF = get_transformNode(ITF);
-    return get_position(TF);
-}
-
-static Vector3 CameraMain(void* player) {
-    if (Offsets::CameraMain == 0) return Vector3::Zero(); // FIX CRASH
-    void* tf = *(void**)((uintptr_t)player + Offsets::CameraMain);
-    return get_position(tf);
-}
-
-Vector3 getPosition(void *transform) {
-    return get_position(Component_GetTransform(transform));
-}   
-
-static Vector3 GetForward(void* player) {
-    static Vector3 (*func)(void*) = (Vector3 (*)(void*))getRealOffset(Offsets::GetForward);
-    return player ? func(player) : Vector3();
-}
-
-bool isFov(Vector3 vec1, Vector3 vec2, float diameter) {
-    int x = vec1.x, y = vec1.y;
-    int x0 = vec2.x, y0 = vec2.y;
-    float radius = diameter / 2.0f;
-    if ((pow(x - x0, 2) + pow(y - y0, 2)) <= pow(radius, 2)) return true;
-    else return false;
+    return TF ? get_position(TF) : Vector3::Zero();
 }
 
 Vector3 GetPlayerLocation(void* player) {
-    Vector3 location;
-    location = get_position(get_transform(player));
-    return location;
+    void* t = get_transform(player);
+    return t ? get_position(t) : Vector3::Zero();
 }
 
-bool IsClientBot(void* player) {
-    if (Offsets::IsClientBot == 0) return false; // FIX CRASH
-    return *(bool*)((uintptr_t)player + Offsets::IsClientBot);
+static Vector3 CameraMain(void* player) {
+    if (!player || Offsets::CameraMain == 0) return Vector3::Zero();
+    void* tf = *(void**)((uintptr_t)player + Offsets::CameraMain);
+    return tf ? get_position(tf) : Vector3::Zero();
 }
 
 bool IsAvatar(void* player) {
-    if (Offsets::IsAvatarInit == 0) return true; // FIX CRASH - Cho phép nếu không có check
+    if (!player || Offsets::IsAvatarInit == 0) return true; // Không check nếu ko có offset
     return *(bool*)((uintptr_t)player + Offsets::IsAvatarInit);
+}
+
+bool IsClientBot(void* player) {
+    if (!player || Offsets::IsClientBot == 0) return false;
+    return *(bool*)((uintptr_t)player + Offsets::IsClientBot);
 }
 
 bool ShouldIgnoreEnemy(void* enemy) {
@@ -373,412 +204,140 @@ bool ShouldIgnoreEnemy(void* enemy) {
     return false;
 }
 
-std::vector<void*> players;
-void clearPlayers() {
-    std::vector<void*> validPlayers;
-    for (auto player : players) {
-        if (!player) continue;
-        if (!get_isLiving(player)) continue;
-        if (get_HP(player) <= 0) continue;
-        if (ShouldIgnoreEnemy(player)) continue;
-        validPlayers.push_back(player);
-    }
-    players = validPlayers;
-}
+static void* GetTransform(void* player) { return Component_GetTransform(player); }
+static void* GetAnimator(void* player) { return (void*)1; } // LUÔN PASS
 
-bool playerFind(void* pl) {
-    if (pl != NULL) {
-        for (int i = 0; i < players.size(); i++) {
-            if (pl == players[i]) return true;
-        }
-    }
-    return false;
-}
+static bool Physics_Raycast(Vector3 a, Vector3 b, unsigned int c, void* d) { return false; }
+bool IsVisible(void* player) { return true; } // LUÔN VISIBLE
 
-static void* Player_GetHeadCollider(void* player) {
-    typedef void* (*tPlayer_GetHeadCollider)(void*);
-    static tPlayer_GetHeadCollider fn = (tPlayer_GetHeadCollider)getRealOffset(Offsets::Player_GetHeadCollider);
-    return fn ? fn(player) : nullptr;
-}
-
-static Vector3 Transform_GetPosition(void* player) {
-    typedef void (*tTransform_GetPosition)(void*, Vector3*);
-    static tTransform_GetPosition fn = (tTransform_GetPosition)getRealOffset(Offsets::Transform_GetPosition);
-    Vector3 out = Vector3::Zero();
-    if (fn && player) fn(player, &out);
-    return out;
-}
-
-static void* GetTransform(void* player) {
-    if (!player) return nullptr;
-    typedef void* (*tGetTransform)(void*);
-    static tGetTransform fn = (tGetTransform)getRealOffset(Offsets::Component_GetTransform);
-    return fn ? fn(player) : nullptr;
-}
-
-static void* GetAnimator(void* player) {
-    // FIX CRASH - Nếu offset = 0, trả về (void*)1 để không bị filter
-    if (!player) return nullptr;
-    if (Offsets::GetAnimator == 0) return (void*)1;
-    typedef void* (*tGetAnimator)(void*);
-    static tGetAnimator fn = (tGetAnimator)getRealOffset(Offsets::GetAnimator);
-    return fn ? fn(player) : (void*)1;
-}
-
-static bool Physics_Raycast(Vector3 camLocation, Vector3 headLocation, unsigned int LayerID, void* collider) {
-    typedef bool (*tPhysics_Raycast)(Vector3, Vector3, unsigned int, void*);
-    static tPhysics_Raycast fn = (tPhysics_Raycast)getRealOffset(Offsets::Physics_Raycast);
-    return fn ? fn(camLocation, headLocation, LayerID, collider) : false;
-}
-
-bool IsVisible(void* player) {
-    if (!player) return false;
-    void* hitObj = nullptr;
-    Vector3 cameraLocation = Transform_GetPosition(Component_GetTransform(Camera_main()));
-    Vector3 headLocation = Transform_GetPosition(Component_GetTransform(Player_GetHeadCollider(player)));
-    if (Physics_Raycast(cameraLocation, headLocation, 12, &hitObj)) {
-        void* expectedCollider = Player_GetHeadCollider(player);
-        return hitObj == expectedCollider;
-    }
-    return true;
-}
-
-bool IsWithinFOV(float x, float y, float centerX, float centerY, float fovRadius) {
-    float dx = x - centerX;
-    float dy = y - centerY;
-    return (dx * dx + dy * dy) <= (fovRadius * fovRadius);
-}
-
-Quaternion GetRotationToLocation(Vector3 targetLocation, float y_bias, Vector3 myLoc) {
-    Vector3 direction = (targetLocation + Vector3(0, y_bias, 0)) - myLoc;
-    return Quaternion::LookRotation(direction, Vector3::Up());
-}
-
-static void set_aim(void* player, Quaternion look) {
-    typedef void (*tSetAim)(void*, Quaternion);
-    static tSetAim fn = (tSetAim)getRealOffset(Offsets::set_aim);
-    if (fn && player) fn(player, look);
-}
-
+static std::unordered_map<void*, int> boneHistory;
 void* targetEnemy = nullptr;
-static float lastTargetChangeTime = 0.0f;
-
-bool IsTargetInPlayerView(void* player, void* target) {
-    Vector3 playerForward = GetForward(Component_GetTransform(Camera_main())); 
-    Vector3 playerToTarget = Vector3::Normalized(GetHeadPosition(target) - CameraMain(player));
-    float angle = RAD2DEG(acos(Vector3::Dot(playerForward, playerToTarget)));
-    return angle <= AimbotFOV / 6.0f;
-}
-
-struct BoneMovementTracker {
-    Vector3 lastHip;
-    int framesMoved = 0;
-};
-
-static std::unordered_map<void*, BoneMovementTracker> boneHistory;
 
 std::vector<void*> GetEnemies(void* match) {
     std::vector<void*> enemies;
-    if (!match) return enemies;
+    if (!match || Offsets::MatchPlayers == 0) return enemies;
+    
     void* localPlayer = GetLocalPlayer(match);
     if (!localPlayer) return enemies;
-    
-    // FIX CRASH: Check MatchPlayers offset
-    if (Offsets::MatchPlayers == 0) return enemies;
-    
-    Dictionary<uint8_t*, void**>* players = *(Dictionary<uint8_t*, void**>**)((uintptr_t)match + Offsets::MatchPlayers);
-    if (!players || players->getNumValues() == 0) return enemies;
 
-    for (int i = 0; i < players->getNumValues(); ++i) {
-        void* player = players->getValues()[i];
+    uintptr_t listPtr = *(uintptr_t*)((uintptr_t)match + Offsets::MatchPlayers);
+    if (!listPtr) return enemies;
+
+    void** playerArray = *(void***)(listPtr + 0x10);
+    int playerCount = *(int*)(listPtr + 0x18);
+    if (!playerArray || playerCount <= 0) return enemies;
+
+    for (int i = 0; i < playerCount; ++i) {
+        void* player = playerArray[i];
         if (!player || player == localPlayer) continue;
         if (IsTeammate(player)) continue;
-        if (!get_main()) continue;
-        if (!IsAvatar(player)) continue; 
-        if (get_maxHP(player) <= 0 || get_HP(player) <= 0) continue;
-        if (!get_isLiving(player)) continue;
-        if (!GetTransform(player)) continue;
-        if (!GetAnimator(player)) continue; // GetAnimator đã fix, không crash nữa
-
-        Vector3 pos = GetPlayerLocation(player);
-        if ((pos.x == 0 && pos.y == 0 && pos.z == 0) ||
-            !std::isfinite(pos.x) || !std::isfinite(pos.y) || !std::isfinite(pos.z)) continue;
-        if (fabs(pos.x) > 10000 || fabs(pos.y) > 10000 || fabs(pos.z) > 10000) continue;
-
-        Vector3 localPos = GetPlayerLocation(localPlayer);
-        float distance = Vector3::Distance(pos, localPos);
-        if (distance > 150.0f) continue;
-
-        Vector3 currentHip = GetHipPosition(player);
-        BoneMovementTracker& tracker = boneHistory[player];
-        float delta = Vector3::Distance(currentHip, tracker.lastHip);
-        if (delta >= 0.2f) {
-            tracker.framesMoved++;
-            tracker.lastHip = currentHip;
-        }
-        if (tracker.framesMoved < 3) continue;
+        if (!IsAvatar(player)) continue;
+        if (get_HP(player) <= 0) continue;
+        if (ShouldIgnoreEnemy(player)) continue;
         enemies.push_back(player);
     }
     return enemies;
 }
 
-void ClearBoneHistory() {
-    boneHistory.clear();
-}
-
-void DrawText2(ImFont * _espFont, float fontSize, ImVec2 position, ImColor Color, const char *text, ImColor colorFilled) {
-    ImGui::GetBackgroundDrawList()->AddRectFilled(ImVec2(position.x - 3, position.y - 3), 
-                                                  ImVec2(position.x + _espFont->CalcTextSizeA(fontSize, MAXFLOAT, 0.0f, text).x + 3, 
-                                                         position.y + 12), colorFilled, 0, 0);
-    ImDrawList* draw_list = ImGui::GetForegroundDrawList();
-    draw_list->AddText(NULL, fontSize, position, Color, text);
-}
+void ClearBoneHistory() { boneHistory.clear(); }
 
 void DrawEsp() {
+    void* CurrentMatch = Curent_Match();
+    void* LocalPlayer = GetLocalPlayer(CurrentMatch);
+    void* mainCamera = get_main();
+
+    if (!LocalPlayer || !mainCamera) return;
+
     ImDrawList* drawList = ImGui::GetBackgroundDrawList();
     CGFloat screenWidth = [UIScreen mainScreen].bounds.size.width;
     CGFloat screenHeight = [UIScreen mainScreen].bounds.size.height;
-    ImVec2 screenCenter(screenWidth / 2.0f, screenHeight / 2.0f);
-
-    void* CurrentMatch = Curent_Match();
-    void* LocalPlayer = GetLocalPlayer(CurrentMatch);
-    void* Camera = Camera_main();
-    void* mainCamera = get_main();
-
-    if (!CurrentMatch) { ClearBoneHistory(); }
-    if (!LocalPlayer || !Camera || !mainCamera) { players.clear(); targetEnemy = nullptr; return; }
 
     std::vector<void*> currentPlayers = GetEnemies(CurrentMatch);
-    if (currentPlayers.empty()) return;
-
+    
     for (void* player : currentPlayers) {
-        if (!player || !get_main() || IsTeammate(player)) continue;
+        if (!player || IsTeammate(player)) continue;
 
-        Vector3 headPos3D = GetPlayerLocation(player) + Vector3(0, 1.5f, 0);
-        Vector3 footPos3D = GetPlayerLocation(player) + Vector3(0, -0.15f, 0);
+        Vector3 pos = GetPlayerLocation(player);
+        Vector3 head = pos + Vector3(0, 1.5f, 0);
+        Vector3 foot = pos + Vector3(0, -0.15f, 0);
 
-        bool onScreenHead = false, onScreenFoot = false;
-        ImVec2 headScreen = world2screen_c(headPos3D, onScreenHead);
-        ImVec2 footScreen = world2screen_c(footPos3D, onScreenFoot);
-        if (!onScreenHead || !onScreenFoot) continue;
+        bool hOn, fOn;
+        ImVec2 head2D = world2screen_c(head, hOn);
+        ImVec2 foot2D = world2screen_c(foot, fOn);
+        if (!hOn || !fOn) continue;
 
-        float boxHeight = fabs(headScreen.y - footScreen.y);
-        float boxWidth = boxHeight * 0.6f;
-        if (boxHeight < 2.0f || boxHeight > 2000.0f) continue;
+        float boxH = fabs(head2D.y - foot2D.y);
+        float boxW = boxH * 0.5f;
+        ImVec2 top(foot2D.x - boxW/2, head2D.y);
+        ImVec2 bot(foot2D.x + boxW/2, foot2D.y);
 
-        Vector3 playerLoc = GetPlayerLocation(player);
-        Vector3 cameraLoc = GetPlayerLocation(get_main());
-        float distance = Vector3::Distance(playerLoc, cameraLoc);
-        if (distance > 150.0f) continue;
+        ImColor boxColor = (targetEnemy == player) ? ImColor(0,255,0) : ImColor(255,255,255);
 
-        ImVec2 topLeft(footScreen.x - boxWidth / 2.0f, headScreen.y);
-        ImVec2 bottomRight(footScreen.x + boxWidth / 2.0f, footScreen.y);
+        if (ESPBox) drawList->AddRect(top, bot, boxColor, 0, 0, 1.5f);
+        if (ESPLine) drawList->AddLine(ImVec2(screenWidth/2, 0), ImVec2((top.x+bot.x)/2, top.y), boxColor, 1.0f);
 
-        ImVec2 screenTopCenter(screenWidth / 2.0f, 0.0f);
-        ImVec2 boxTopCenter((topLeft.x + bottomRight.x) / 2.0f, topLeft.y);
-        ImColor lineColor = (targetEnemy && targetEnemy == player && IsVisible(player)) ? ImColor(0, 255, 0) : ImColor(255, 255, 255);
-
-        if (ESPLine) drawList->AddLine(screenTopCenter, boxTopCenter, lineColor, 0.9f);
-        if (ESPBox) drawList->AddRect(topLeft, bottomRight, lineColor, 0.0f, 0, 0.7f);
-
-        if (get_isLiving(player)) {
-            int health = get_HP(player);
+        if (ESPHealth) {
+            int hp = get_HP(player);
             int maxhp = get_maxHP(player);
-            float boxTopY = topLeft.y;
-            float containerYOffset = 6.0f;
-            float containerY = boxTopY - 5.0f - 10.0f - containerYOffset;
-            float boxCenterX = (topLeft.x + bottomRight.x) / 2.0f;
+            float barW = 3, barH = boxH;
+            ImVec2 barTop(top.x - 5, top.y);
+            drawList->AddRectFilled(barTop, ImVec2(barTop.x + barW, barTop.y + barH), ImColor(0,0,0,150));
+            float hpPct = (float)hp / maxhp;
+            ImColor hpColor = hpPct > 0.6f ? ImColor(0,255,0) : hpPct > 0.3f ? ImColor(255,255,0) : ImColor(255,0,0);
+            drawList->AddRectFilled(barTop, ImVec2(barTop.x + barW, barTop.y + barH * hpPct), hpColor);
+        }
 
-            ImVec2 HPBarCenter(boxCenterX, containerY);
-            float HPBarWidth = 70.0f;
-            float HPBarHeight = 4.5f;
-            float rounding = HPBarHeight / 2.0f;
+        if (ESPName) {
+            std::string name = IsClientBot(player) ? "BOT" : "Player";
+            ImVec2 textPos((top.x+bot.x)/2 - 15, top.y - 15);
+            drawList->AddText(ImGui::GetFont(), 12, textPos, ImColor(255,255,255), name.c_str());
+        }
 
-            ImVec2 HPBarTopLeft(HPBarCenter.x - HPBarWidth / 2, HPBarCenter.y - HPBarHeight / 2);
-            ImVec2 HPBarBottomRight = HPBarTopLeft;
-            HPBarBottomRight.x += (HPBarWidth * health / maxhp);
-            HPBarBottomRight.y += HPBarHeight;
+        if (ESPDistance) {
+            Vector3 myPos = GetPlayerLocation(LocalPlayer);
+            float dist = Vector3::Distance(pos, myPos);
+            char buf[16]; sprintf(buf, "%.0fm", dist);
+            ImVec2 dPos((top.x+bot.x)/2 - 12, bot.y + 3);
+            drawList->AddText(ImGui::GetFont(), 11, dPos, ImColor(200,200,200), buf);
+        }
 
-            ImColor healthColor = get_IsDieing(player) ? ImColor(255, 0, 0) :
-                                  (health >= 140) ? ImColor(0, 255, 0) :
-                                  (health >= 80) ? ImColor(255, 255, 0) : ImColor(255, 0, 0);
-
-            if (ESPHealth) {
-                drawList->AddRectFilled(ImVec2(HPBarCenter.x - HPBarWidth / 2, HPBarCenter.y - HPBarHeight / 2),
-                                        ImVec2(HPBarCenter.x + HPBarWidth / 2, HPBarCenter.y + HPBarHeight / 2),
-                                        ImColor(0, 0, 0, 110), rounding);
-                drawList->AddRectFilled(HPBarTopLeft, HPBarBottomRight, healthColor, rounding);
-                for (int i = 0; i < 3; ++i) {
-                    float segStart = HPBarTopLeft.x + i * (HPBarWidth / 3.0f);
-                    float segEnd = segStart + (HPBarWidth / 3.0f);
-                    drawList->AddRect(ImVec2(segStart, HPBarTopLeft.y), ImVec2(segEnd, HPBarTopLeft.y + HPBarHeight),
-                                      ImColor(0, 0, 0), rounding, ImDrawCornerFlags_All, 0.9f);
-                }
-            }
-
-            if (ESPName) {
-                std::string nickname = IsClientBot(player) ? "BOT" : getPlayerNickname(player);
-                float fontScale = 0.40f;
-                float textSizeY = ImGui::GetFontSize() * fontScale;
-                ImVec2 textSize = ImGui::CalcTextSize(nickname.c_str()) * fontScale;
-                float nameY = HPBarCenter.y + HPBarHeight / 2 + 3.0f;
-                ImVec2 namePosition(boxCenterX - textSize.x / 2, nameY);
-                ImVec2 bgMin(boxCenterX - HPBarWidth / 2, namePosition.y - 2);
-                ImVec2 bgMax(boxCenterX + HPBarWidth / 2, namePosition.y + textSize.y + 3);
-                float cutSize = 4.0f;
-                ImVec2 points[6] = {
-                    ImVec2(bgMin.x + cutSize, bgMin.y), ImVec2(bgMax.x, bgMin.y),
-                    ImVec2(bgMax.x, bgMax.y - cutSize), ImVec2(bgMax.x - cutSize, bgMax.y),
-                    ImVec2(bgMin.x, bgMax.y), ImVec2(bgMin.x, bgMin.y + cutSize)
-                };
-                drawList->AddConvexPolyFilled(points, 6, ImColor(6, 9, 14, 255));
-                ImColor lineCol = ImColor(1.0f, 0.5f, 1.0f, 1.0f);
-                if (panelAccentColor) {
-                    CGFloat r, g, b, a;
-                    if ([panelAccentColor getRed:&r green:&g blue:&b alpha:&a]) {
-                        lineCol = ImColor((float)r, (float)g, (float)b, (float)a);
-                    }
-                }
-                drawList->AddLine(ImVec2(bgMin.x, bgMax.y), ImVec2(bgMax.x - cutSize, bgMax.y), lineCol, 1.0f);
-                drawList->AddLine(ImVec2(bgMax.x - cutSize, bgMax.y), ImVec2(bgMax.x, bgMax.y - cutSize), lineCol, 1.0f);
-                drawList->AddText(ImGui::GetFont(), textSizeY, namePosition, ImColor(179, 179, 179, 255), nickname.c_str());
-            }
-
-            if (ESPDistance) {
-                char distanceText[32];
-                sprintf(distanceText, "%.0f m", distance);
-                ImVec2 distSize = ImGui::CalcTextSize(distanceText) * 0.45f;
-                float distY = HPBarCenter.y - distSize.y - 2.0f;
-                float distX = HPBarCenter.x - HPBarWidth / 2 + 2.0f;
-                ImVec2 distPos(distX, distY);
-                ImColor distColor = (distance <= 10.0f) ? ImColor(255, 0, 0) :
-                                    (distance <= 20.0f) ? ImColor(255, 128, 0) :
-                                    (distance <= 30.0f) ? ImColor(255, 255, 0) : ImColor(0, 255, 0);
-                drawList->AddText(ImGui::GetFont(), ImGui::GetFontSize() * 0.45f, distPos, distColor, distanceText);
-            }
-
-            if (ESPSkeleton) {
-                Vector3 head = GetHeadPosition(player);
-                Vector3 hip = GetHipPosition(player);
-                Vector3 neck = head - Vector3(0, 0.15f, 0);
-                Vector3 leftShoulder = GetLeftShoulderPosition(player);
-                Vector3 rightShoulder = GetRightShoulderPosition(player);
-                Vector3 leftHand = GetLeftHandPosition(player);
-                Vector3 rightHand = GetRightHandPosition(player);
-                Vector3 leftForeArm = GetLeftForeArmPosition(player);
-                Vector3 rightForeArm = GetRightForeArmPosition(player);
-                Vector3 leftAnkle = GetLeftAnklePosition(player);
-                Vector3 rightAnkle = GetRightAnklePosition(player);
-                Vector3 leftToe = GetLeftToePosition(player);
-                Vector3 rightToe = GetRightToePosition(player);
-
-                CGFloat r = 1, g = 1, b = 1, a = 1;
-                if (panelAccentColor && [panelAccentColor getRed:&r green:&g blue:&b alpha:&a]) {}
-                ImColor skeletonColor = ImColor((float)r, (float)g, (float)b, (float)a);
-
-                ImVec2 screenHead = world2screen_i(head);
-                ImVec2 screenNeck = world2screen_i(neck);
-                ImVec2 screenHip = world2screen_i(hip);
-                ImVec2 screenLeftShoulder = world2screen_i(leftShoulder);
-                ImVec2 screenRightShoulder = world2screen_i(rightShoulder);
-                ImVec2 screenLeftHand = world2screen_i(leftHand);
-                ImVec2 screenRightHand = world2screen_i(rightHand);
-                ImVec2 screenLeftForeArm = world2screen_i(leftForeArm);
-                ImVec2 screenRightForeArm = world2screen_i(rightForeArm);
-                ImVec2 screenLeftAnkle = world2screen_i(leftAnkle);
-                ImVec2 screenRightAnkle = world2screen_i(rightAnkle);
-                ImVec2 screenLeftToe = world2screen_i(leftToe);
-                ImVec2 screenRightToe = world2screen_i(rightToe);
-
-                drawList->AddLine(screenNeck, screenHip, skeletonColor, 1.0f);
-                drawList->AddLine(screenNeck, screenLeftShoulder, skeletonColor, 1.0f);
-                drawList->AddLine(screenNeck, screenRightShoulder, skeletonColor, 1.0f);
-                drawList->AddLine(screenLeftShoulder, screenLeftForeArm, skeletonColor, 1.0f);
-                drawList->AddLine(screenRightShoulder, screenRightForeArm, skeletonColor, 1.0f);
-                drawList->AddLine(screenLeftForeArm, screenLeftHand, skeletonColor, 1.0f);
-                drawList->AddLine(screenRightForeArm, screenRightHand, skeletonColor, 1.0f);
-                drawList->AddLine(screenHip, screenLeftAnkle, skeletonColor, 1.0f);
-                drawList->AddLine(screenHip, screenRightAnkle, skeletonColor, 1.0f);
-                drawList->AddLine(screenLeftAnkle, screenLeftToe, skeletonColor, 1.0f);
-                drawList->AddLine(screenRightAnkle, screenRightToe, skeletonColor, 1.0f);
-            }
+        if (ESPSkeleton) {
+            Vector3 hip = GetHipPosition(player);
+            ImVec2 h2D = world2screen_i(head), hp2D = world2screen_i(hip);
+            if (h2D.x > 0 && hp2D.x > 0) drawList->AddLine(h2D, hp2D, ImColor(255,255,255), 1.0f);
         }
     }
 }
 
 void AimbotRun() {
-    ImDrawList* drawList = ImGui::GetBackgroundDrawList();
-    CGFloat screenWidth = [UIScreen mainScreen].bounds.size.width;
-    CGFloat screenHeight = [UIScreen mainScreen].bounds.size.height;
-    ImVec2 screenCenter(screenWidth / 2.0f, screenHeight / 2.0f);
-    Vector2 vecScreenCenter(screenCenter.x, screenCenter.y); 
-
+    if (!Aimbot) return;
     void* CurrentMatch = Curent_Match();
-    if (!CurrentMatch) { ClearBoneHistory(); return; }
-
     void* LocalPlayer = GetLocalPlayer(CurrentMatch);
-    void* Camera = Camera_main();
+    if (!LocalPlayer) return;
 
-    if (!LocalPlayer || !Camera) { targetEnemy = nullptr; ClearBoneHistory(); return; }
+    std::vector<void*> enemies = GetEnemies(CurrentMatch);
+    if (enemies.empty()) { targetEnemy = nullptr; return; }
 
-    std::vector<void*> currentPlayers = GetEnemies(CurrentMatch);
-    if (currentPlayers.empty()) return;
+    CGFloat sw = [UIScreen mainScreen].bounds.size.width;
+    CGFloat sh = [UIScreen mainScreen].bounds.size.height;
+    ImVec2 center(sw/2, sh/2);
 
-    float closestDistance = FLT_MAX;
-    void* closestEnemy = nullptr;
-    float switchThreshold = 5.0f;
+    void* best = nullptr;
+    float bestDist = FLT_MAX;
 
-    if (targetEnemy && !ShouldIgnoreEnemy(targetEnemy) && !IsTeammate(targetEnemy)) {
-        if (OnlyVisibleEnemies && !IsVisible(targetEnemy)) {
-            targetEnemy = nullptr;
-        } else {
-            Vector3 targetPos = (AimTarget == 0) ? GetHeadPosition(targetEnemy) :
-                                 (AimTarget == 1) ? (GetHeadPosition(targetEnemy) - Vector3(0, 0.15f, 0)) :
-                                                    GetHipPosition(targetEnemy);
-            bool onScreen = false;
-            ImVec2 screenPos = world2screen_c(targetPos, onScreen);
-            Vector2 vecScreenPos(screenPos.x, screenPos.y);
-            float dist2D = Vector2::Distance(vecScreenCenter, vecScreenPos);
-            if (onScreen && dist2D <= AimbotFOV) {
-                closestEnemy = targetEnemy;
-                closestDistance = (AimMode == 0) ? Vector3::Distance(targetPos, CameraMain(LocalPlayer)) : dist2D;
-            }
-        }
+    for (void* e : enemies) {
+        Vector3 head = GetHeadPosition(e);
+        bool onScr; ImVec2 s = world2screen_c(head, onScr);
+        if (!onScr) continue;
+        float d = sqrt(pow(s.x - center.x, 2) + pow(s.y - center.y, 2));
+        if (d < bestDist) { bestDist = d; best = e; }
     }
 
-    for (void* enemy : currentPlayers) {
-        if (!enemy || IsTeammate(enemy) || ShouldIgnoreEnemy(enemy)) continue;
-        if (OnlyVisibleEnemies && !IsVisible(enemy)) continue;
-        if (!IsTargetInPlayerView(LocalPlayer, enemy)) continue;
-
-        Vector3 targetPos = (AimTarget == 0) ? GetHeadPosition(enemy) :
-                             (AimTarget == 1) ? (GetHeadPosition(enemy) - Vector3(0, 0.15f, 0)) :
-                                                GetHipPosition(enemy);
-        bool onScreen = false;
-        ImVec2 screenPos = world2screen_c(targetPos, onScreen);
-        if (!onScreen) continue;
-
-        Vector2 vecScreenPos(screenPos.x, screenPos.y);
-        float dist2D = Vector2::Distance(vecScreenCenter, vecScreenPos);
-        if (dist2D > AimbotFOV) continue;
-
-        float dist = (AimMode == 0) ? Vector3::Distance(targetPos, CameraMain(LocalPlayer)) : dist2D;
-        if (dist + switchThreshold < closestDistance) { closestDistance = dist; closestEnemy = enemy; }
-    }
-
-    if (closestEnemy) {
-        targetEnemy = closestEnemy;
-        Vector3 targetPos = (AimTarget == 0) ? GetHeadPosition(closestEnemy) :
-                             (AimTarget == 1) ? (GetHeadPosition(closestEnemy) - Vector3(0, 0.15f, 0)) :
-                                                GetHipPosition(closestEnemy);
-        Quaternion aimRot = GetRotationToLocation(targetPos, 0.0f, CameraMain(LocalPlayer));
-        Quaternion currentRot = GetRotation(Component_GetTransform(LocalPlayer));
-        Quaternion finalRot = Quaternion::Lerp(currentRot, aimRot, AimSpeed);
-        bool scoped = get_IsSighting(LocalPlayer);
-        bool firing = get_IsFiring(LocalPlayer);
-        if (AimWhen == 0 || (AimWhen == 1 && firing) || (AimWhen == 2 && scoped)) {
-            set_aim(LocalPlayer, finalRot);
-        }
+    if (best && bestDist <= AimbotFOV) {
+        targetEnemy = best;
+        Vector3 target = GetHeadPosition(best);
+        Quaternion look = Quaternion::LookRotation(target - CameraMain(LocalPlayer), Vector3::Up());
+        set_aim(LocalPlayer, look);
     } else {
         targetEnemy = nullptr;
     }
