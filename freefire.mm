@@ -131,7 +131,7 @@ static void INIT_PATCH_NAME(void) {
     NSMutableData* _kLx59qEfBdwU = StaticInlineHookSessionStart((char*)[ENCRYPT_NS("UnityFramework") UTF8String], &_kNhz28MfAL9o);
 
     // ═══════════════════════════════════════════════════════════
-    // FAKE MEMORY + REPORT (6) - DÙNG StaticInlineHookPatchInMemory
+    // FAKE MEMORY + REPORT (6)
     // ═══════════════════════════════════════════════════════════
     StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1CFC2B0"), ENCRYPTHEX("000080d2c0035fd6"));
     StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1CFC604"), ENCRYPTHEX("000080d2c0035fd6"));
@@ -141,7 +141,7 @@ static void INIT_PATCH_NAME(void) {
     StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1CFA3F0"), ENCRYPTHEX("c0035fd6"));
 
     // ═══════════════════════════════════════════════════════════
-    // DCKLGOGDPCH - Anti-Cheat Controller (24)
+    // DCKLGOGDPCH (22)
     // ═══════════════════════════════════════════════════════════
     StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1CFA010"), ENCRYPTHEX("000080d2c0035fd6"));
     StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1CFA198"), ENCRYPTHEX("000080d2c0035fd6"));
@@ -167,7 +167,7 @@ static void INIT_PATCH_NAME(void) {
     StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1CFB31C"), ENCRYPTHEX("000080d2c0035fd6"));
 
     // ═══════════════════════════════════════════════════════════
-    // PENGBDFHIIN - Memory Scan & Report (29)
+    // PENGBDFHIIN (28)
     // ═══════════════════════════════════════════════════════════
     StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1CFB6D8"), ENCRYPTHEX("000080d2c0035fd6"));
     StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1CFBA8C"), ENCRYPTHEX("000080d2c0035fd6"));
@@ -197,10 +197,9 @@ static void INIT_PATCH_NAME(void) {
     StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1CFCD0C"), ENCRYPTHEX("c0035fd6"));
     StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1CFE080"), ENCRYPTHEX("000080d2c0035fd6"));
     StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1CFE23C"), ENCRYPTHEX("000080d2c0035fd6"));
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1CFE304"), ENCRYPTHEX("000080d2c0035fd6"));
 
     // ═══════════════════════════════════════════════════════════
-    // DETECTION BYPASSES (4)
+    // DETECTION (4)
     // ═══════════════════════════════════════════════════════════
     StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x532969C"), ENCRYPTHEX("000080d2c0035fd6"));
     StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x3302244"), ENCRYPTHEX("000080d2c0035fd6"));
@@ -208,7 +207,7 @@ static void INIT_PATCH_NAME(void) {
     StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x29A1A4C"), ENCRYPTHEX("000080d2c0035fd6"));
 
     // ═══════════════════════════════════════════════════════════
-    // MEMORY SCANS (2)
+    // MEMORY SCAN (2)
     // ═══════════════════════════════════════════════════════════
     StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x6281F88"), ENCRYPTHEX("000080d2c0035fd6"));
     StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x6281F90"), ENCRYPTHEX("000080d2c0035fd6"));
@@ -220,13 +219,10 @@ static void INIT_PATCH_NAME(void) {
     StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1C7CFAC"), nullptr);
 
     StaticInlineHookSessionSave(_kLx59qEfBdwU, _kNhz28MfAL9o);
-    
     #else
     // ═══════════════════════════════════════════════════════════
-    // NON-PATCH MODE: ActiveOff + InlineHook
+    // FAKE MEMORY + REPORT (6)
     // ═══════════════════════════════════════════════════════════
-    
-    // FAKE MEMORY
     ActiveOff(ENCRYPTOFFSET("0x1CFC2B0"), ENCRYPTHEX("000080d2c0035fd6"));
     ActiveOff(ENCRYPTOFFSET("0x1CFC604"), ENCRYPTHEX("000080d2c0035fd6"));
     ActiveOff(ENCRYPTOFFSET("0x1CFC708"), ENCRYPTHEX("200080d2c0035fd6"));
@@ -234,7 +230,9 @@ static void INIT_PATCH_NAME(void) {
     ActiveOff(ENCRYPTOFFSET("0x1CFB958"), ENCRYPTHEX("c0035fd6"));
     ActiveOff(ENCRYPTOFFSET("0x1CFA3F0"), ENCRYPTHEX("c0035fd6"));
 
-    // DCKLGOGDPCH
+    // ═══════════════════════════════════════════════════════════
+    // DCKLGOGDPCH (22)
+    // ═══════════════════════════════════════════════════════════
     ActiveOff(ENCRYPTOFFSET("0x1CFA010"), ENCRYPTHEX("000080d2c0035fd6"));
     ActiveOff(ENCRYPTOFFSET("0x1CFA198"), ENCRYPTHEX("000080d2c0035fd6"));
     ActiveOff(ENCRYPTOFFSET("0x1CFA2A4"), ENCRYPTHEX("000080d2c0035fd6"));
@@ -243,6 +241,66 @@ static void INIT_PATCH_NAME(void) {
     ActiveOff(ENCRYPTOFFSET("0x1CFA660"), ENCRYPTHEX("000080d2c0035fd6"));
     ActiveOff(ENCRYPTOFFSET("0x1CFAE2C"), ENCRYPTHEX("000080d2c0035fd6"));
     ActiveOff(ENCRYPTOFFSET("0x1CFAEEC"), ENCRYPTHEX("200080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CF9B60"), ENCRYPTHEX("000080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CF9CC0"), ENCRYPTHEX("000080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CF9DC8"), ENCRYPTHEX("000080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CF9EB8"), ENCRYPTHEX("000080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CF9F64"), ENCRYPTHEX("000080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CFAAE8"), ENCRYPTHEX("000080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CFACB4"), ENCRYPTHEX("000080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CFAD08"), ENCRYPTHEX("000080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CFAD80"), ENCRYPTHEX("000080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CFAF38"), ENCRYPTHEX("000080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CFB25C"), ENCRYPTHEX("000080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CFB29C"), ENCRYPTHEX("000080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CFB2DC"), ENCRYPTHEX("000080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CFB31C"), ENCRYPTHEX("000080d2c0035fd6"));
+
+    // ═══════════════════════════════════════════════════════════
+    // PENGBDFHIIN (28)
+    // ═══════════════════════════════════════════════════════════
+    ActiveOff(ENCRYPTOFFSET("0x1CFB6D8"), ENCRYPTHEX("000080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CFBA8C"), ENCRYPTHEX("000080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CFC82C"), ENCRYPTHEX("000080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CFBFB0"), ENCRYPTHEX("000080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CFC070"), ENCRYPTHEX("000080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CFC9F4"), ENCRYPTHEX("000080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CFCE14"), ENCRYPTHEX("c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CFCECC"), ENCRYPTHEX("000080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CFD208"), ENCRYPTHEX("c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CFD3CC"), ENCRYPTHEX("200080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CFBF5C"), ENCRYPTHEX("000080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CFC130"), ENCRYPTHEX("000080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CFD4FC"), ENCRYPTHEX("000080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CFD728"), ENCRYPTHEX("000080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CFDAA0"), ENCRYPTHEX("c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CFDB50"), ENCRYPTHEX("000080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CFDB94"), ENCRYPTHEX("000080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CFDC0C"), ENCRYPTHEX("000080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CFC1F0"), ENCRYPTHEX("000080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CFDC4C"), ENCRYPTHEX("000080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CFDC8C"), ENCRYPTHEX("000080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CFDD4C"), ENCRYPTHEX("000080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CFDE30"), ENCRYPTHEX("000080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CFDF28"), ENCRYPTHEX("000080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CFBE54"), ENCRYPTHEX("c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CFCD0C"), ENCRYPTHEX("c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CFE080"), ENCRYPTHEX("000080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x1CFE23C"), ENCRYPTHEX("000080d2c0035fd6"));
+
+    // ═══════════════════════════════════════════════════════════
+    // DETECTION (4)
+    // ═══════════════════════════════════════════════════════════
+    ActiveOff(ENCRYPTOFFSET("0x532969C"), ENCRYPTHEX("000080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x3302244"), ENCRYPTHEX("000080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x380EFAC"), ENCRYPTHEX("000080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x29A1A4C"), ENCRYPTHEX("000080d2c0035fd6"));
+
+    // ═══════════════════════════════════════════════════════════
+    // MEMORY SCAN (2)
+    // ═══════════════════════════════════════════════════════════
+    ActiveOff(ENCRYPTOFFSET("0x6281F88"), ENCRYPTHEX("000080d2c0035fd6"));
+    ActiveOff(ENCRYPTOFFSET("0x6281F90"), ENCRYPTHEX("000080d2c0035fd6"));
 
     // 4 cheat
     InlineHook(ENCRYPTOFFSET("0x27D07B4"), (void*)resetguesthook, resetguestoriginal);
