@@ -606,7 +606,7 @@ NSArray<UIColor *> *colorValues = @[
 }
 
 - (void)buildSidebar {
-    static NSArray<NSString *> *baseTitles = nil;
+
     static dispatch_once_t onceToken;
     dispatch_once(&onceToken, ^{
         baseTitles = @[
