@@ -6,6 +6,16 @@ header('Access-Control-Allow-Headers: Content-Type');
 
 $dbFile = __DIR__ . '/api/database.json';
 
+function decryptData($base64) {
+    $key = hex2bin('A1B2C3D4E5F60718293A4B5C6D7E8F9012233445566778899AABBCCDDEEFF001');
+    $data = base64_decode($base64);
+    if (strlen($data) < 16) return null;
+    $iv = substr($data, 0, 16);
+    $ciphertext = substr($data, 16);
+    $result = openssl_decrypt($ciphertext, 'aes-256-cbc', $key, OPENSSL_RAW_DATA, $iv);
+    return $result;
+}
+
 function readDB() {
     global $dbFile;
     if (!file_exists($dbFile)) {
@@ -26,14 +36,37 @@ function readDB() {
     return json_decode(file_get_contents($dbFile), true) ?: ['keys' => [], 'offsets' => []];
 }
 
-function writeDB($data) { global $dbFile; file_put_contents($dbFile, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)); }
+function writeDB($data) { 
+    global $dbFile; 
+    file_put_contents($dbFile, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)); 
+}
 
 $action = $_GET['action'] ?? '';
-$input = json_decode(file_get_contents('php://input'), true) ?: [];
+
+// Đọc input thô
+$rawInput = file_get_contents('php://input');
+$input = [];
+
+// Giải mã nếu có dữ liệu
+if (!empty($rawInput)) {
+    $decrypted = decryptData($rawInput);
+    if ($decrypted) {
+        $input = json_decode($decrypted, true) ?: [];
+    }
+}
+
+// Nếu không giải mã được, thử đọc như JSON thường
+if (empty($input) && !empty($rawInput)) {
+    $input = json_decode($rawInput, true) ?: [];
+}
 
 switch ($action) {
     case 'auth':
         $key = $input['key'] ?? '';
+        if (empty($key)) {
+            echo json_encode(['success' => false, 'message' => 'Key is required']);
+            exit;
+        }
         $db = readDB();
         foreach ($db['keys'] as $i => $k) {
             if ($k['key'] === $key && $k['active'] && $k['expires_at'] > time()) {
@@ -79,21 +112,42 @@ switch ($action) {
     case 'delete_key':
         $key = $input['key'] ?? '';
         $db = readDB();
-        foreach ($db['keys'] as $i => $k) { if ($k['key'] === $key) { unset($db['keys'][$i]); $db['keys'] = array_values($db['keys']); writeDB($db); echo json_encode(['success' => true, 'message' => 'Key deleted!']); exit; } }
+        foreach ($db['keys'] as $i => $k) { 
+            if ($k['key'] === $key) { 
+                unset($db['keys'][$i]); 
+                $db['keys'] = array_values($db['keys']); 
+                writeDB($db); 
+                echo json_encode(['success' => true, 'message' => 'Key deleted!']); 
+                exit; 
+            } 
+        }
         echo json_encode(['success' => false, 'message' => 'Key not found']);
         break;
         
     case 'extend_key':
-        $key = $input['key'] ?? ''; $days = max(1, (int)($input['days'] ?? 30));
+        $key = $input['key'] ?? ''; 
+        $days = max(1, (int)($input['days'] ?? 30));
         $db = readDB();
-        foreach ($db['keys'] as $i => $k) { if ($k['key'] === $key) { $db['keys'][$i]['expires_at'] = max($db['keys'][$i]['expires_at'], time()) + ($days * 86400); writeDB($db); echo json_encode(['success' => true, 'message' => "Extended {$days} days!"]); exit; } }
+        foreach ($db['keys'] as $i => $k) { 
+            if ($k['key'] === $key) { 
+                $db['keys'][$i]['expires_at'] = max($db['keys'][$i]['expires_at'], time()) + ($days * 86400); 
+                writeDB($db); 
+                echo json_encode(['success' => true, 'message' => "Extended {$days} days!"]); 
+                exit; 
+            } 
+        }
         echo json_encode(['success' => false, 'message' => 'Key not found']);
         break;
         
     case 'save_offsets':
         $offsets = $input['offsets'] ?? [];
-        if (empty($offsets)) { echo json_encode(['success' => false, 'message' => 'No offsets']); exit; }
-        $db = readDB(); $db['offsets'] = $offsets; writeDB($db);
+        if (empty($offsets)) { 
+            echo json_encode(['success' => false, 'message' => 'No offsets']); 
+            exit; 
+        }
+        $db = readDB(); 
+        $db['offsets'] = $offsets; 
+        writeDB($db);
         echo json_encode(['success' => true, 'message' => 'Offsets saved!']);
         break;
         
