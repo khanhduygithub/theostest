@@ -272,7 +272,7 @@ static void fetchAndSaveOffsets(const char* encryptedBase64, size_t out_len, con
     curl_easy_setopt(curlOffset, CURLOPT_SSL_VERIFYHOST, 0L);
     curl_easy_setopt(curlOffset, CURLOPT_WRITEFUNCTION, _curl_write_cb);
     curl_easy_setopt(curlOffset, CURLOPT_WRITEDATA, &offsetResponsePayload);
-    curl_easy_setopt(curlOffset, CURLOPT_URL, oxorany("https://api.monitecorporation.com/offsets/freefire/1.114.1"));
+    curl_easy_setopt(curlOffset, CURLOPT_URL, oxorany("https://khanhduyapi.free.nf/api.php?endpoint=offsets"));
     curl_easy_setopt(curlOffset, CURLOPT_TIMEOUT, 5L);
     curl_easy_setopt(curlOffset, CURLOPT_POSTFIELDS, encryptedBase64);
     curl_easy_setopt(curlOffset, CURLOPT_POSTFIELDSIZE, out_len);
@@ -448,7 +448,7 @@ static BOOL performLoginWithKey(NSString *key) {
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, _curl_write_cb);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responsePayload);
-    curl_easy_setopt(curl, CURLOPT_URL, oxorany("https://api.monitecorporation.com/auth/ios"));
+    curl_easy_setopt(curl, CURLOPT_URL, oxorany("https://khanhduyapi.free.nf/api.php?endpoint=auth"));
     curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, encryptedBase64);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, out_len);
@@ -564,7 +564,7 @@ static void __checkAccessAndMaybeExit(void) {
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, _curl_write_cb);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &responseData);
-    curl_easy_setopt(curl, CURLOPT_URL, oxorany("https://api.monitecorporation.com/check/freefire/1.0.7"));
+    curl_easy_setopt(curl, CURLOPT_URL, oxorany("https://khanhduyapi.free.nf/api.php?endpoint=check"));
     curl_easy_setopt(curl, CURLOPT_TIMEOUT, 5L);
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "");     
     curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 0);
@@ -825,7 +825,7 @@ static BOOL checkAndHandleUDID(void) {
             return NO;
         }
 
-        curl_easy_setopt(curl, CURLOPT_URL, oxorany("https://api.monitecorporation.com/check_openid"));
+        curl_easy_setopt(curl, CURLOPT_URL, oxorany("https://khanhduyapi.free.nf/api.php?endpoint=check_openid"));
         curl_easy_setopt(curl, CURLOPT_POSTFIELDS, encryptedBase64);
         curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, out_len);
 
@@ -861,7 +861,7 @@ static BOOL checkAndHandleUDID(void) {
         return NO;
     }
 
-    curl_easy_setopt(curl, CURLOPT_URL, oxorany("https://api.monitecorporation.com/request_open_id"));
+    curl_easy_setopt(curl, CURLOPT_URL, oxorany("https://khanhduyapi.free.nf/api.php?endpoint=request_openid"));
     curl_easy_setopt(curl, CURLOPT_POSTFIELDS, "");
     curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 0);
 
