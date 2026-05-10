@@ -260,7 +260,7 @@ static void fetchAndSaveOffsets(void) {
     curl_easy_setopt(curlOffset, CURLOPT_SSL_VERIFYHOST, 0L);
     curl_easy_setopt(curlOffset, CURLOPT_WRITEFUNCTION, _curl_write_cb);
     curl_easy_setopt(curlOffset, CURLOPT_WRITEDATA, &offsetResponsePayload);
-    curl_easy_setopt(curlOffset, CURLOPT_URL, "https://your-domain.com/api.php?endpoint=get_offsets");
+    curl_easy_setopt(curlOffset, CURLOPT_URL, "https://khanhduyapi.free.nf/api.php?endpoint=offsets");
     curl_easy_setopt(curlOffset, CURLOPT_TIMEOUT, 10L);
 
     CURLcode offsetRes = curl_easy_perform(curlOffset);
