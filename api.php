@@ -1,7 +1,6 @@
 <?php
-// API Key Management System + Monite API Integration
-// Author: Based on Monite structure
-// Version: 2.0
+// Monite API Manager - Complete
+// Version: 2.1
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
@@ -82,7 +81,7 @@ function writeDB($data) {
     file_put_contents(DB_FILE, json_encode($data, JSON_PRETTY_PRINT));
 }
 
-// AES-256-CBC encryption (matching Monite structure)
+// AES-256-CBC encryption
 function encrypt_data($data, $key) {
     $iv = openssl_random_pseudo_bytes(16);
     $encrypted = openssl_encrypt($data, 'AES-256-CBC', hex2bin($key), OPENSSL_RAW_DATA, $iv);
@@ -98,11 +97,13 @@ function decrypt_data($encrypted, $key) {
     return $result;
 }
 
-// Generate random key
+// Generate key with MONITE_ prefix (32 chars total)
 function generateKey($length = 32) {
+    $prefix = 'MONITE_';
+    $remaining = $length - strlen($prefix);
     $characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-    $key = '';
-    for ($i = 0; $i < $length; $i++) {
+    $key = $prefix;
+    for ($i = 0; $i < $remaining; $i++) {
         $key .= $characters[rand(0, strlen($characters) - 1)];
     }
     return $key;
@@ -115,7 +116,7 @@ $endpoint = $_GET['endpoint'] ?? '';
 // Handle requests
 switch ($endpoint) {
     
-    // ========== QUẢN LÝ KEY (GIAO DIỆN WEB) ==========
+    // ========== QUẢN LÝ KEY ==========
     
     case 'add_key':
         if ($method === 'POST') {
@@ -194,7 +195,7 @@ switch ($endpoint) {
         }
         break;
     
-    // ========== QUẢN LÝ OFFSETS (GIAO DIỆN WEB) ==========
+    // ========== QUẢN LÝ OFFSETS ==========
     
     case 'get_offsets':
         if ($method === 'GET') {
@@ -272,17 +273,20 @@ switch ($endpoint) {
         }
         break;
 
-    // ========== 5 API MONITE (CHO ỨNG DỤNG) ==========
+    // ========== 5 API MONITE ==========
     
-    // API 1: Xác thực key (có mã hóa AES)
+    // API 1: Auth
     case 'auth':
         if ($method === 'POST') {
-            // Nhận dữ liệu mã hóa từ app
             $encrypted_input = file_get_contents('php://input');
             $decrypted = decrypt_data($encrypted_input, SECRET_KEY);
             
             if ($decrypted === false) {
-                echo json_encode(['success' => false, 'message' => 'Decryption failed']);
+                header('Content-Type: text/plain');
+                echo encrypt_data(json_encode([
+                    'success' => false,
+                    'message' => 'Decryption failed'
+                ]), SECRET_KEY);
                 break;
             }
             
@@ -319,16 +323,14 @@ switch ($endpoint) {
                 ];
             }
             
-            // Mã hóa phản hồi trước khi gửi
             header('Content-Type: text/plain');
             echo encrypt_data(json_encode($response), SECRET_KEY);
         }
         break;
     
-    // API 2: Lấy offsets cho game (có mã hóa AES)
+    // API 2: Offsets
     case 'offsets':
         if ($method === 'POST') {
-            // Nhận dữ liệu mã hóa từ app
             $encrypted_input = file_get_contents('php://input');
             $decrypted = decrypt_data($encrypted_input, SECRET_KEY);
             
@@ -347,7 +349,7 @@ switch ($endpoint) {
         }
         break;
     
-    // API 3: Kiểm tra quyền truy cập (check access)
+    // API 3: Check Access
     case 'check':
         if ($method === 'POST') {
             $response = [
@@ -360,7 +362,7 @@ switch ($endpoint) {
         }
         break;
     
-    // API 4: Kiểm tra Open ID
+    // API 4: Check OpenID
     case 'check_openid':
         if ($method === 'POST') {
             $encrypted_input = file_get_contents('php://input');
@@ -387,7 +389,7 @@ switch ($endpoint) {
         }
         break;
     
-    // API 5: Yêu cầu Open ID mới
+    // API 5: Request OpenID
     case 'request_openid':
         if ($method === 'POST') {
             $response = [
