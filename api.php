@@ -152,11 +152,12 @@ switch ($action) {
     // ============ OFFSET MANAGEMENT ============
     
     case 'get_offsets':
+        // Đảm bảo trả về đúng format mà load.mm mong đợi
         echo json_encode([
             'success' => true,
             'offsets' => $db['offsets'] ?? [],
             'total' => count($db['offsets'] ?? [])
-        ]);
+        ], JSON_UNESCAPED_UNICODE);
         break;
     
     case 'save_offsets':
