@@ -2,7 +2,7 @@
 #import <UIKit/UIKit.h>
 #import <objc/runtime.h>
 #import <Foundation/Foundation.h>
-#import "../Obfuscate.h"
+#import "Esp/Obfuscate.h"
 
 #define URL _uPt91AkZoGcV
 #define HARJDUI56KQ _fNs64TbKwRmY
@@ -18,18 +18,50 @@
     [NSURLProtocol registerClass:[EtcHostsURLProtocol class]];
 
     NSArray *blockedHosts = @[
-        NSSENCRYPT("app-measurement.com"),
+        // ==================== GG BLUE SHARK ====================
         NSSENCRYPT("brevent.ggblueshark.com"),
         NSSENCRYPT("vnevent.ggblueshark.com"),
+        
+        // ==================== GG WHITE HAWK ====================
+        NSSENCRYPT("version.ggwhitehawk.com"),
+        
+        // ==================== DATADOME ====================
         NSSENCRYPT("datadome.garena.com"),
+        
+        // ==================== MSDK SECURITY ====================
         NSSENCRYPT("100067.msdk.garena.com"),
         NSSENCRYPT("100067.connect.garena.com"),
-        NSSENCRYPT("dl.gmc.freefiremobile.com"),
-        NSSENCRYPT("gin.freefiremobile.com"),
+        NSSENCRYPT("100067.ff.connect.garena.com"),
+        
+        // ==================== CORE ANTICHEAT ====================
+        NSSENCRYPT("core-ak.freefiremobile.com"),
+        NSSENCRYPT("dl.ak.freefiremobile.com"),
+        NSSENCRYPT("dl.aw.freefiremobile.com"),
+        NSSENCRYPT("core-cvs.freefiremobile.com"),
+        NSSENCRYPT("dl.cvs.freefiremobile.com"),
+        
+        // ==================== GARENA API ====================
+        NSSENCRYPT("sea.k8s.garenanow.com"),
+        NSSENCRYPT("34.104.32.54.mcdn.garenanow.com"),
+        NSSENCRYPT("ff-security.garena.com"),
+        NSSENCRYPT("ff-logs.garena.com"),
+        NSSENCRYPT("ff-data.garena.com"),
+        NSSENCRYPT("ff-monitoring.garena.com"),
+        NSSENCRYPT("report.ff.garena.com"),
+        NSSENCRYPT("ffguide.garena.com"),
+        
+        // ==================== TRACKING GOOGLE ====================
+        NSSENCRYPT("iid.googleapis.com"),
+        NSSENCRYPT("fcmtoken.googleapis.com"),
+        NSSENCRYPT("firebaselogging-pa.googleapis.com"),
+        
+        // ==================== APPSFLYER ====================
+        NSSENCRYPT("appsflyersdk.com"),
+        NSSENCRYPT("appsflyer.com"),
+        
+        // ==================== APPLE ====================
         NSSENCRYPT("amp-api-edge.apps.apple.com"),
         NSSENCRYPT("inappcheck.itunes.apple.com"),
-        NSSENCRYPT("x8i6qo-launches.appsflyersdk.com"),
-        NSSENCRYPT("appsflyersdk.com")
     ];
 
     [EtcHostsURLProtocol configureHostsWithBlock:^(id <EtcHostsConfiguration> config) {
@@ -48,18 +80,50 @@
 
 + (instancetype)HARJDUI56KQ:(NSString *)urlString {
     NSArray *blockedHosts = @[
-        NSSENCRYPT("app-measurement.com"),
+        // ==================== GG BLUE SHARK ====================
         NSSENCRYPT("brevent.ggblueshark.com"),
         NSSENCRYPT("vnevent.ggblueshark.com"),
+        
+        // ==================== GG WHITE HAWK ====================
+        NSSENCRYPT("version.ggwhitehawk.com"),
+        
+        // ==================== DATADOME ====================
         NSSENCRYPT("datadome.garena.com"),
+        
+        // ==================== MSDK SECURITY ====================
         NSSENCRYPT("100067.msdk.garena.com"),
         NSSENCRYPT("100067.connect.garena.com"),
-        NSSENCRYPT("dl.gmc.freefiremobile.com"),
-        NSSENCRYPT("gin.freefiremobile.com"),
+        NSSENCRYPT("100067.ff.connect.garena.com"),
+        
+        // ==================== CORE ANTICHEAT ====================
+        NSSENCRYPT("core-ak.freefiremobile.com"),
+        NSSENCRYPT("dl.ak.freefiremobile.com"),
+        NSSENCRYPT("dl.aw.freefiremobile.com"),
+        NSSENCRYPT("core-cvs.freefiremobile.com"),
+        NSSENCRYPT("dl.cvs.freefiremobile.com"),
+        
+        // ==================== GARENA API ====================
+        NSSENCRYPT("sea.k8s.garenanow.com"),
+        NSSENCRYPT("34.104.32.54.mcdn.garenanow.com"),
+        NSSENCRYPT("ff-security.garena.com"),
+        NSSENCRYPT("ff-logs.garena.com"),
+        NSSENCRYPT("ff-data.garena.com"),
+        NSSENCRYPT("ff-monitoring.garena.com"),
+        NSSENCRYPT("report.ff.garena.com"),
+        NSSENCRYPT("ffguide.garena.com"),
+        
+        // ==================== TRACKING GOOGLE ====================
+        NSSENCRYPT("iid.googleapis.com"),
+        NSSENCRYPT("fcmtoken.googleapis.com"),
+        NSSENCRYPT("firebaselogging-pa.googleapis.com"),
+        
+        // ==================== APPSFLYER ====================
+        NSSENCRYPT("appsflyersdk.com"),
+        NSSENCRYPT("appsflyer.com"),
+        
+        // ==================== APPLE ====================
         NSSENCRYPT("amp-api-edge.apps.apple.com"),
         NSSENCRYPT("inappcheck.itunes.apple.com"),
-        NSSENCRYPT("x8i6qo-launches.appsflyersdk.com"),
-        NSSENCRYPT("appsflyersdk.com")
     ];
 
     for (NSString *host in blockedHosts) {
