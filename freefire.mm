@@ -23,20 +23,19 @@
 
 #define INIT_PATCH_NAME _kTx39QpAV7re
 
-// ===== IMPROVED GLOBAL VARIABLES =====
-volatile bool forceHighFPS = false;
-volatile bool resetguest = false;
-volatile bool swapweapon = false;
-volatile bool norecoil = false;
+// ===== GLOBAL VARIABLES (FIXED) =====
+// extern from globals.h - no volatile to match declaration
+bool forceHighFPS = false;
+bool resetguest = false;
+bool swapweapon = false;
+bool norecoil = false;
 volatile bool g_bypassActive = false;
 
 // ===== ANTI-DETECTION HELPERS =====
-// Random delay to avoid timing-based detection
 static void random_delay() {
     usleep(arc4random_uniform(1000) + 500);
 }
 
-// Check if debugger is attached (anti-debug)
 static bool is_debugger_present() {
     int mib[4] = {CTL_KERN, KERN_PROC, KERN_PROC_PID, getpid()};
     struct kinfo_proc info;
@@ -47,8 +46,7 @@ static bool is_debugger_present() {
     return false;
 }
 
-// ===== IMPROVED HOOK FUNCTIONS =====
-// Original function pointers with volatile to prevent optimization
+// ===== HOOK FUNCTIONS =====
 volatile void* force120fpsoriginal = nullptr;
 bool force120fpshook(void* _this) {
     if (g_bypassActive && forceHighFPS) {
@@ -89,14 +87,14 @@ volatile void* orig_KHHMBLDMKEN = nullptr;
 void hook_KHHMBLDMKEN(void* _this, Vector3* vec, float a, float b) {
     if (g_bypassActive && norecoil) {
         random_delay();
-        return; // Skip recoil
+        return;
     }
     if (orig_KHHMBLDMKEN && !is_debugger_present()) {
         ((void(*)(void*, Vector3*, float, float))orig_KHHMBLDMKEN)(_this, vec, a, b);
     }
 }
 
-// ===== IMPROVED HASH VERIFICATION =====
+// ===== HASH VERIFICATION =====
 std::string sha256(const void* data, size_t len) {
     unsigned char hash[CC_SHA256_DIGEST_LENGTH];
     CC_SHA256(data, (CC_LONG)len, hash);
@@ -108,30 +106,22 @@ std::string sha256(const void* data, size_t len) {
     return ss.str();
 }
 
-// ===== FRAMEWORK VALIDATION WITH TIMING ATTACK PROTECTION =====
+// ===== FRAMEWORK VALIDATION =====
 bool validateLoadedFrameworks() {
-    // Constant-time comparison to prevent timing attacks
     volatile int ok = 1;
     volatile int check = 0;
-    
-    // Add random seed for obfuscation
     check = arc4random() | 0x5A5A5A5A;
-    
     for (volatile int i = 0; i < 32; i++) {
         check ^= (i * 0xFA + arc4random_uniform(0x100));
         ok &= (check != 0) ? 1 : 0;
     }
-    
-    // Add fake detection delay
     usleep(arc4random_uniform(100));
-    
     return (ok == 1);
 }
 
-// ===== MAIN PATCH ROUTINE WITH ANTI-DETECTION =====
+// ===== MAIN PATCH ROUTINE =====
 __attribute__((constructor))
 static void INIT_PATCH_NAME(void) {
-    // Anti-debug: Kill if debugger detected
     if (is_debugger_present()) {
         __asm volatile ("mov x0, #0x1\n");
         __asm volatile ("mov x1, #0x2D\n");
@@ -140,7 +130,6 @@ static void INIT_PATCH_NAME(void) {
         exit(45);
     }
     
-    // Framework validation with obfuscated flow
     int detected = 0;
     void *handle = dlopen(NULL, RTLD_NOW);
     
@@ -150,23 +139,16 @@ static void INIT_PATCH_NAME(void) {
         volatile auto local_strstr = (char* (*)(const char*, const char*))dlsym(handle, ENCRYPT("strstr"));
         
         if (local_dyld_image_count && local_dyld_get_image_name && local_strstr) {
-            // Split detection check into multiple obscured steps
             bool framework_check = validateLoadedFrameworks();
-            
-            // Obscure the detection logic
             volatile int detection_flags = 0;
             if (!framework_check) detection_flags |= (1 << (arc4random_uniform(4)));
             if (local_dyld_image_count() > 1000) detection_flags |= (1 << (arc4random_uniform(4) + 4));
-            
             detected |= detection_flags;
         }
-        
         dlclose(handle);
     }
     
-    // Anti-tamper protection
     if (detected) {
-        // Fake crash with misleading error
         usleep(arc4random_uniform(5000) + 1000);
         __asm volatile ("mov x0, #0x1\n");
         __asm volatile ("mov x1, #0x2D\n");
@@ -176,7 +158,6 @@ static void INIT_PATCH_NAME(void) {
     }
 
 #ifdef PATCH_MODE
-    // Initialize patch session with delay
     usleep(arc4random_uniform(2000) + 500);
     
     NSString* _kNhz28MfAL9o = nil;
@@ -186,37 +167,33 @@ static void INIT_PATCH_NAME(void) {
     );
 
     if (!_kLx59qEfBdwU) {
-        // Patch session failed - exit silently
         return;
     }
 
-    // ===== CATEGORIZED PATCHES WITH PRIORITY =====
+    // PRIORITY 1: CRITICAL ANTI-HACK
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1B31770"), ENCRYPTHEX("c0035fd6"));
+    usleep(50);
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1A2BE4C"), ENCRYPTHEX("c0035fd6"));
+    usleep(50);
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1A2E3D4"), ENCRYPTHEX("c0035fd6"));
+    usleep(50);
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x47F7384"), ENCRYPTHEX("c0035fd6"));
+    usleep(50);
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x15F2F3C"), ENCRYPTHEX("c0035fd6"));
+    usleep(50);
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x22573C8"), ENCRYPTHEX("c0035fd6"));
     
-    // PRIORITY 1: CRITICAL ANTI-HACK (MUST BYPASS)
-    // These detect cheat tools/memory scanners
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1B31770"), ENCRYPTHEX("c0035fd6")); // Anti-cheat core 1
-    usleep(50); // Small delay between patches to avoid pattern detection
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1A2BE4C"), ENCRYPTHEX("c0035fd6")); // Anti-cheat core 2
-    usleep(50);
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1A2E3D4"), ENCRYPTHEX("c0035fd6")); // Anti-tamper 1
-    usleep(50);
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x47F7384"), ENCRYPTHEX("c0035fd6")); // Anti-tamper 2
-    usleep(50);
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x15F2F3C"), ENCRYPTHEX("c0035fd6")); // Memory integrity
-    usleep(50);
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x22573C8"), ENCRYPTHEX("c0035fd6")); // Cheat detection main
-    
-    // PRIORITY 2: BYPASS PARSER (DETECTION FINGERPRINTS)
+    // PRIORITY 2: BYPASS PARSER
     usleep(100);
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x380EFAC"), ENCRYPTHEX("c0035fd6"));       // Parser bypass 1
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x380EFAC"), ENCRYPTHEX("c0035fd6"));
     usleep(50);
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x380ED7C"), ENCRYPTHEX("000080d2c0035fd6")); // Parser bypass 2 (with MOV W0, #0)
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x380EE3C"), ENCRYPTHEX("c0035fd6"));       // Parser bypass 3
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x380ED7C"), ENCRYPTHEX("000080d2c0035fd6"));
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x380EE3C"), ENCRYPTHEX("c0035fd6"));
     
     // PRIORITY 3: DETECTION FUNCTIONS
     usleep(100);
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x44C312C"), ENCRYPTHEX("200080d2c0035fd6")); // Detection bypass (MOV W0, #1 + RET)
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x3B6C114"), ENCRYPTHEX("c0035fd6"));         // Detection bypass 2
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x44C312C"), ENCRYPTHEX("200080d2c0035fd6"));
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x3B6C114"), ENCRYPTHEX("c0035fd6"));
     
     // PRIORITY 4: INTEGRITY CHECKS
     usleep(100);
@@ -233,28 +210,24 @@ static void INIT_PATCH_NAME(void) {
     StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x6282104"), ENCRYPTHEX("000080d2c0035fd6"));
     StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x6282250"), ENCRYPTHEX("000080d2c0035fd6"));
     
-    // PRIORITY 6: UI DETECTION (LAST PRIORITY)
+    // PRIORITY 6: UI DETECTION
     usleep(100);
     StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x532969C"), ENCRYPTHEX("c0035fd6"));
     StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x29A16D0"), ENCRYPTHEX("c0035fd6"));
     StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x29A1170"), ENCRYPTHEX("c0035fd6"));
     StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x2257640"), ENCRYPTHEX("c0035fd6"));
     
-    // FUNCTION HOOKS FOR GAME FEATURES
+    // FUNCTION HOOKS
     usleep(200);
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x27D07B4"), nullptr);  // Reset guest
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1CD5200"), nullptr);  // Force 120 FPS
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x5EB914C"), nullptr);  // Swap weapon CD
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1C7CFAC"), nullptr);  // No recoil
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x27D07B4"), nullptr);
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1CD5200"), nullptr);
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x5EB914C"), nullptr);
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1C7CFAC"), nullptr);
     
-    // Activate bypass
     g_bypassActive = true;
-    
-    // Save patch session
     StaticInlineHookSessionSave(_kLx59qEfBdwU, _kNhz28MfAL9o);
     
 #else
-    // Fallback mode
     ActiveOff(ENCRYPTOFFSET("0x1B31770"), ENCRYPTHEX("c0035fd6"));
     ActiveOff(ENCRYPTOFFSET("0x1A2BE4C"), ENCRYPTHEX("c0035fd6"));
     ActiveOff(ENCRYPTOFFSET("0x1A2E3D4"), ENCRYPTHEX("c0035fd6"));
