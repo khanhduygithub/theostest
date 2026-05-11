@@ -23,8 +23,9 @@
 
 #define INIT_PATCH_NAME _kTx39QpAV7re
 
-// ===== GLOBAL VARIABLES (FIXED) =====
-// extern from globals.h - no volatile to match declaration
+// ===== GLOBAL VARIABLES =====
+// forceHighFPS, resetguest, swapweapon, norecoil defined in menu.mm
+volatile bool g_bypassActive = false;
 
 // ===== ANTI-DETECTION HELPERS =====
 static void random_delay() {
@@ -89,62 +90,10 @@ void hook_KHHMBLDMKEN(void* _this, Vector3* vec, float a, float b) {
     }
 }
 
-// ===== HASH VERIFICATION =====
-std::string sha256(const void* data, size_t len) {
-    unsigned char hash[CC_SHA256_DIGEST_LENGTH];
-    CC_SHA256(data, (CC_LONG)len, hash);
-    std::ostringstream ss;
-    ss << std::hex << std::setfill('0');
-    for (int i = 0; i < CC_SHA256_DIGEST_LENGTH; ++i) {
-        ss << std::setw(2) << (int)hash[i];
-    }
-    return ss.str();
-}
-
-// ===== FRAMEWORK VALIDATION =====
-bool validateLoadedFrameworks() {
-    volatile int ok = 1;
-    volatile int check = 0;
-    check = arc4random() | 0x5A5A5A5A;
-    for (volatile int i = 0; i < 32; i++) {
-        check ^= (i * 0xFA + arc4random_uniform(0x100));
-        ok &= (check != 0) ? 1 : 0;
-    }
-    usleep(arc4random_uniform(100));
-    return (ok == 1);
-}
-
 // ===== MAIN PATCH ROUTINE =====
 __attribute__((constructor))
 static void INIT_PATCH_NAME(void) {
     if (is_debugger_present()) {
-        __asm volatile ("mov x0, #0x1\n");
-        __asm volatile ("mov x1, #0x2D\n");
-        __asm volatile ("mov x16, #0\n");
-        __asm volatile ("svc #0x150\n");
-        exit(45);
-    }
-    
-    int detected = 0;
-    void *handle = dlopen(NULL, RTLD_NOW);
-    
-    if (handle) {
-        volatile auto local_dyld_image_count = (uint32_t (*)())dlsym(handle, ENCRYPT("_dyld_image_count"));
-        volatile auto local_dyld_get_image_name = (const char* (*)(uint32_t))dlsym(handle, ENCRYPT("_dyld_get_image_name"));
-        volatile auto local_strstr = (char* (*)(const char*, const char*))dlsym(handle, ENCRYPT("strstr"));
-        
-        if (local_dyld_image_count && local_dyld_get_image_name && local_strstr) {
-            bool framework_check = validateLoadedFrameworks();
-            volatile int detection_flags = 0;
-            if (!framework_check) detection_flags |= (1 << (arc4random_uniform(4)));
-            if (local_dyld_image_count() > 1000) detection_flags |= (1 << (arc4random_uniform(4) + 4));
-            detected |= detection_flags;
-        }
-        dlclose(handle);
-    }
-    
-    if (detected) {
-        usleep(arc4random_uniform(5000) + 1000);
         __asm volatile ("mov x0, #0x1\n");
         __asm volatile ("mov x1, #0x2D\n");
         __asm volatile ("mov x16, #0\n");
@@ -165,71 +114,92 @@ static void INIT_PATCH_NAME(void) {
         return;
     }
 
-    // PRIORITY 1: CRITICAL ANTI-HACK
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1B31770"), ENCRYPTHEX("c0035fd6"));
+    // =============================================
+    // PRIORITY 1: MEMORY SCAN & INTEGRITY (MỚI)
+    // =============================================
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x2A45B80"), ENCRYPTHEX("c0035fd6")); // Memory Scan
     usleep(50);
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1A2BE4C"), ENCRYPTHEX("c0035fd6"));
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x2A45C10"), ENCRYPTHEX("c0035fd6")); // Memory Integrity
     usleep(50);
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1A2E3D4"), ENCRYPTHEX("c0035fd6"));
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x4D8A120"), ENCRYPTHEX("c0035fd6")); // Process Check
     usleep(50);
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x47F7384"), ENCRYPTHEX("c0035fd6"));
-    usleep(50);
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x15F2F3C"), ENCRYPTHEX("c0035fd6"));
-    usleep(50);
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x22573C8"), ENCRYPTHEX("c0035fd6"));
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x7A4D9C0"), ENCRYPTHEX("c0035fd6")); // Screenshot Block
     
-    // PRIORITY 2: BYPASS PARSER
+    // =============================================
+    // PRIORITY 2: JAILBREAK CHECK (MỚI)
+    // =============================================
     usleep(100);
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x380EFAC"), ENCRYPTHEX("c0035fd6"));
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x5E2B390"), ENCRYPTHEX("c0035fd6")); // Jailbreak Check 1
     usleep(50);
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x380ED7C"), ENCRYPTHEX("000080d2c0035fd6"));
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x380EE3C"), ENCRYPTHEX("c0035fd6"));
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x5E2B420"), ENCRYPTHEX("c0035fd6")); // Jailbreak Check 2
     
-    // PRIORITY 3: DETECTION FUNCTIONS
+    // =============================================
+    // PRIORITY 3: HACKER DETECTED UI (MỚI)
+    // =============================================
     usleep(100);
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x44C312C"), ENCRYPTHEX("200080d2c0035fd6"));
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x3B6C114"), ENCRYPTHEX("c0035fd6"));
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x532969C"), ENCRYPTHEX("c0035fd6")); // ShowHackerDetectedUI
     
-    // PRIORITY 4: INTEGRITY CHECKS
+    // =============================================
+    // PRIORITY 4: INTEGRITY CHECKS (MỚI)
+    // =============================================
     usleep(100);
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x3CBE000"), ENCRYPTHEX("000080d2c0035fd6"));
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x5F98C80"), ENCRYPTHEX("000080d2c0035fd6"));
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x7CB01EC"), ENCRYPTHEX("000080d2c0035fd6"));
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x7CB03B4"), ENCRYPTHEX("000080d2c0035fd6"));
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x7CB66C4"), ENCRYPTHEX("000080d2c0035fd6"));
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x4D018FC"), ENCRYPTHEX("c0035fd6")); // IntegrityCheck 1
+    usleep(50);
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x4D01904"), ENCRYPTHEX("c0035fd6")); // IntegrityCheck 2
+    usleep(50);
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x62809D4"), ENCRYPTHEX("c0035fd6")); // IntegrityVerify
+    usleep(50);
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x6281F24"), ENCRYPTHEX("c0035fd6")); // IntegrityMonitor
     
-    // PRIORITY 5: MEMORY SCANNER BYPASS
+    // =============================================
+    // PRIORITY 5: SECURITY VALIDATION (MỚI)
+    // =============================================
     usleep(100);
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x6281F88"), ENCRYPTHEX("000080d2c0035fd6"));
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x6281F90"), ENCRYPTHEX("000080d2c0035fd6"));
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x6282104"), ENCRYPTHEX("000080d2c0035fd6"));
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x6282250"), ENCRYPTHEX("000080d2c0035fd6"));
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x397A354"), ENCRYPTHEX("c0035fd6")); // SecurityMonitor
+    usleep(50);
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x397A7F0"), ENCRYPTHEX("c0035fd6")); // SecurityValidate
+    usleep(50);
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x397A7F8"), ENCRYPTHEX("c0035fd6")); // SecurityCheck
+    usleep(50);
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x397A850"), ENCRYPTHEX("c0035fd6")); // SecurityVerify
     
-    // PRIORITY 6: UI DETECTION
+    // =============================================
+    // PRIORITY 6: ADVANCED DETECTION (MỚI)
+    // =============================================
     usleep(100);
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x532969C"), ENCRYPTHEX("c0035fd6"));
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x29A16D0"), ENCRYPTHEX("c0035fd6"));
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x29A1170"), ENCRYPTHEX("c0035fd6"));
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x2257640"), ENCRYPTHEX("c0035fd6"));
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1CFC2B0"), ENCRYPTHEX("c0035fd6")); // Advanced Detection 1
+    usleep(50);
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1CFC604"), ENCRYPTHEX("c0035fd6")); // Advanced Detection 2
+    usleep(50);
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1CFC708"), ENCRYPTHEX("c0035fd6")); // Advanced Detection 3
+    usleep(50);
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1CFC82C"), ENCRYPTHEX("c0035fd6")); // Advanced Detection 4
+    usleep(50);
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1CFC9F4"), ENCRYPTHEX("c0035fd6")); // Advanced Detection 5
+    usleep(50);
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1CFCAF8"), ENCRYPTHEX("c0035fd6")); // Advanced Detection 6
+    usleep(50);
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1CFD208"), ENCRYPTHEX("c0035fd6")); // Advanced Detection 7
+    usleep(50);
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1CFD4FC"), ENCRYPTHEX("c0035fd6")); // Advanced Detection 8
+    usleep(50);
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1CFDB50"), ENCRYPTHEX("c0035fd6")); // Advanced Detection 9
+    usleep(50);
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1CFDC4C"), ENCRYPTHEX("c0035fd6")); // Advanced Detection 10
     
-    // FUNCTION HOOKS
+    // =============================================
+    // ORIGINAL GAME FEATURES
+    // =============================================
     usleep(200);
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x27D07B4"), nullptr);
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1CD5200"), nullptr);
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x5EB914C"), nullptr);
-    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1C7CFAC"), nullptr);
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x27D07B4"), nullptr);  // Reset guest
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1CD5200"), nullptr);  // Force 120 FPS
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x5EB914C"), nullptr);  // Swap weapon CD
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x1C7CFAC"), nullptr);  // No recoil
     
     g_bypassActive = true;
     StaticInlineHookSessionSave(_kLx59qEfBdwU, _kNhz28MfAL9o);
     
 #else
-    ActiveOff(ENCRYPTOFFSET("0x1B31770"), ENCRYPTHEX("c0035fd6"));
-    ActiveOff(ENCRYPTOFFSET("0x1A2BE4C"), ENCRYPTHEX("c0035fd6"));
-    ActiveOff(ENCRYPTOFFSET("0x1A2E3D4"), ENCRYPTHEX("c0035fd6"));
-    ActiveOff(ENCRYPTOFFSET("0x47F7384"), ENCRYPTHEX("c0035fd6"));
-    ActiveOff(ENCRYPTOFFSET("0x15F2F3C"), ENCRYPTHEX("c0035fd6"));
-    ActiveOff(ENCRYPTOFFSET("0x22573C8"), ENCRYPTHEX("c0035fd6"));
-    
     InlineHook(ENCRYPTOFFSET("0x27D07B4"), (void*)resetguesthook, (volatile void**)&resetguestoriginal);
     InlineHook(ENCRYPTOFFSET("0x1CD5200"), (void*)force120fpshook, (volatile void**)&force120fpsoriginal);
     InlineHook(ENCRYPTOFFSET("0x5EB914C"), (void*)hook_get_InSwapWeaponCD, (volatile void**)&orig_get_InSwapWeaponCD);
