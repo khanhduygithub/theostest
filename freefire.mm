@@ -25,11 +25,6 @@
 
 // ===== GLOBAL VARIABLES (FIXED) =====
 // extern from globals.h - no volatile to match declaration
-bool forceHighFPS = false;
-bool resetguest = false;
-bool swapweapon = false;
-bool norecoil = false;
-volatile bool g_bypassActive = false;
 
 // ===== ANTI-DETECTION HELPERS =====
 static void random_delay() {
