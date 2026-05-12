@@ -127,7 +127,6 @@ const char* (*p_dyld_get_image_name)(uint32_t);
 char* (*p_strstr)(const char*, const char*);
 #define XOR_KEY 0xFA
 
-// ===== FIX: HÀM DECODE AN TOÀN, CÓ NULL CHECK =====
 std::string decode_xor(const uint8_t* data) {
     std::string out;
     if (data == nullptr) return out;
@@ -142,7 +141,8 @@ std::vector<std::string> getDecodedFrameworkNames() {
 
     for (int i = 0; i < framework_size; ++i) {
         std::string s;
-        if (framework_names != nullptr && framework_names[i] != nullptr) {
+        // FIX: framework_names là array, không cần check nullptr cho array
+        if (framework_names[i] != nullptr) {
             for (int j = 0; framework_names[i][j] != 0x00; ++j) {
                 s += (char)(framework_names[i][j] ^ XOR_KEY);
             }
@@ -158,7 +158,8 @@ std::vector<std::string> getDecodedFrameworkHashes() {
 
     for (int i = 0; i < framework_size; ++i) {
         std::string s;
-        if (framework_hashes != nullptr && framework_hashes[i] != nullptr) {
+        // FIX: framework_hashes là array, không cần check nullptr cho array
+        if (framework_hashes[i] != nullptr) {
             for (int j = 0; framework_hashes[i][j] != 0x00; ++j) {
                 s += (char)(framework_hashes[i][j] ^ XOR_KEY);
             }
@@ -187,8 +188,6 @@ static void INIT_PATCH_NAME(void) {
 		p_strstr = (char* (*)(const char*, const char*))dlsym(handle, ENCRYPT("strstr"));
 
 		if (p_dyld_image_count && p_dyld_get_image_name && p_strstr) {
-			// ===== FIX: validateLoadedFrameworks() luôn trả về true =====
-			// nên detected sẽ không bị set thành 1
 			bool frameworkValid = validateLoadedFrameworks();
 			if (!frameworkValid) {
 				detected = 1;
@@ -198,8 +197,6 @@ static void INIT_PATCH_NAME(void) {
 		dlclose(handle);
 	}
 	
-	// ===== FIX: CHỈ CRASH KHI THỰC SỰ PHÁT HIỆN =====
-	// Hiện tại detected luôn = 0 nên không bao giờ crash
 	if (detected) {
 	    __asm volatile ("mov x0, #0x1\n");
         __asm volatile ("mov x1, #0x2D\n");
@@ -212,7 +209,7 @@ static void INIT_PATCH_NAME(void) {
     NSString* _kNhz28MfAL9o = nil;
     NSMutableData* _kLx59qEfBdwU = StaticInlineHookSessionStart((char*)[ENCRYPT_NS("freefireth") UTF8String], &_kNhz28MfAL9o);
 
-    // ===== 69 OFFSET MỚI THAY THẾ TOÀN BỘ OFFSET CŨ =====
+    // ===== 69 OFFSET MỚI =====
     StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x004006EC"), ENCRYPTHEX("20008052C0035FD6"));
     StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x0042FF28"), ENCRYPTHEX("20008052C0035FD6"));
     StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x004404D4"), ENCRYPTHEX("20008052C0035FD6"));
@@ -256,6 +253,7 @@ static void INIT_PATCH_NAME(void) {
     StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x00550EC8"), ENCRYPTHEX("20008052C0035FD6"));
     StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x005515A8"), ENCRYPTHEX("20008052C0035FD6"));
     StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x00551954"), ENCRYPTHEX("20008052C0035FD6"));
+    StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTHEX("20008052C0035FD6"));
     StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x0055195C"), ENCRYPTHEX("20008052C0035FD6"));
     StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x00551964"), ENCRYPTHEX("20008052C0035FD6"));
     StaticInlineHookPatchInMemory(_kLx59qEfBdwU, ENCRYPTOFFSET("0x0055385C"), ENCRYPTHEX("20008052C0035FD6"));
@@ -368,5 +366,5 @@ static void INIT_PATCH_NAME(void) {
     InlineHook(ENCRYPTOFFSET("0x1CD5200"), force120fpshook, force120fpsoriginal);
     InlineHook(ENCRYPTOFFSET("0x5EB914C"), hook_get_InSwapWeaponCD, orig_get_InSwapWeaponCD);
     InlineHook(ENCRYPTOFFSET("0x1C7CFAC"), hook_KHHMBLDMKEN, orig_KHHMBLDMKEN);
-
-#endif}
+#endif
+}
