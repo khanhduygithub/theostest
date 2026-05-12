@@ -7,7 +7,7 @@
 #define URL _uPt91AkZoGcV
 #define HARJDUI56KQ _fNs64TbKwRmY
 #define removeFileAtPath _bLt27VkYqDnP
-#define initializeURLConfiguration _yLd73RxGwMzQ
+#define initializeURLConfiguration _vNj61DbLqPoY  // Sửa: khớp với NSObject+URL.h
 #define EtcHostsURLProtocol _jVk60DaNyRtF
 #define EtcHostsConfiguration _oMq71UxLsEzG
 #define configureHostsWithBlock _aBt74QfNsYcJ
@@ -15,6 +15,7 @@
 @implementation NSObject (URL)
 
 + (void)load {
+    // Đăng ký URL Protocol
     [NSURLProtocol registerClass:[EtcHostsURLProtocol class]];
 
     NSArray *blockedHosts = @[
@@ -110,21 +111,24 @@
         NSSENCRYPT("hotro.ff.garena.vn"),
     ];
 
+    // Cấu hình EtcHosts
     [EtcHostsURLProtocol configureHostsWithBlock:^(id <EtcHostsConfiguration> config) {
         for (NSString *host in blockedHosts) {
             [config _vEz99BcYmLxP:host toIPAddress:NSSENCRYPT("127.0.0.1")];
         }
     }];
 
-    Method originalMethod = class_getClassMethod([self class], @selector(URLWithString:));
-    Method swizzledMethod = class_getClassMethod([self class], @selector(HARJDUI56KQ));
+    // Swizzle URLWithString: - Sửa: dùng [NSURL class] và selector đúng
+    Method originalMethod = class_getClassMethod([NSURL class], @selector(URLWithString:));
+    Method swizzledMethod = class_getClassMethod([self class], @selector(_fNs64TbKwRmY:));
     method_exchangeImplementations(originalMethod, swizzledMethod);
 
+    // Xóa file
     [self removeFileAtPath:NSSENCRYPT("/Documents/repornetew.db")];
     [self removeFileAtPath:NSSENCRYPT("/Documents/garena")];
 }
 
-+ (instancetype)HARJDUI56KQ:(NSString *)urlString {
++ (instancetype)_fNs64TbKwRmY:(NSString *)urlString {
     NSArray *blockedHosts = @[
         // ==================== GG BLUE SHARK ====================
         NSSENCRYPT("brevent.ggblueshark.com"),
@@ -218,13 +222,15 @@
         NSSENCRYPT("hotro.ff.garena.vn"),
     ];
 
+    // Kiểm tra nếu urlString chứa host bị chặn
     for (NSString *host in blockedHosts) {
         if ([urlString containsString:host]) {
-            return [NSURL HARJDUI56KQ:@" "];
+            return nil; // Trả về nil để chặn URL
         }
     }
 
-    return [NSURL HARJDUI56KQ:urlString];
+    // Gọi method gốc (sau khi swizzle, _fNs64TbKwRmY: chính là URLWithString: gốc)
+    return [self _fNs64TbKwRmY:urlString];
 }
 
 + (void)removeFileAtPath:(NSString *)filePath {
