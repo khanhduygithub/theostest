@@ -32,6 +32,6 @@ endif
 
 $(TWEAK_NAME)_FRAMEWORKS = UIKit Foundation Security QuartzCore CoreGraphics CoreText AVFoundation Accelerate GLKit SystemConfiguration GameController
 
-$(TWEAK_NAME)_FILES = Draw.mm Themes/ThemeManager.mm menuUIKIT/buttons.mm Themes/UIComponents.mm menuUIKIT/touchView.mm $(wildcard Others/*.mm) $(wildcard Web/*.mm) $(wildcard Esp/*.mm) $(wildcard Hosts/*.m) $(wildcard Hosts/*.mm) $(wildcard Hidestream/*.mm) $(wildcard JRMemory.framework/*.mm) $(wildcard KittyMemory/*.mm) $(wildcard KittyMemory/*.cpp) $(wildcard Esp/*.m) $(wildcard hook/*.c)
+$(TWEAK_NAME)_FILES = Draw.mm detect.mm Themes/ThemeManager.mm menuUIKIT/buttons.mm Themes/UIComponents.mm menuUIKIT/touchView.mm $(wildcard Others/*.mm) $(wildcard Web/*.mm) $(wildcard Esp/*.mm) $(wildcard Hosts/*.m) $(wildcard Hosts/*.mm) $(wildcard Hidestream/*.mm) $(wildcard JRMemory.framework/*.mm) $(wildcard KittyMemory/*.mm) $(wildcard KittyMemory/*.cpp) $(wildcard Esp/*.m) $(wildcard hook/*.c)
 
 include $(THEOS_MAKE_PATH)/tweak.mk
